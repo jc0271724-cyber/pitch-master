@@ -423,6 +423,10 @@ export class AppController {
     } else if (tabId === 'solfege') {
       if (solfegePanel) solfegePanel.classList.remove('hidden');
     }
+
+    if (this.staff) {
+      this.staff.draw();
+    }
   }
 
   updateKeySignature() {

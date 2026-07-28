@@ -143,22 +143,39 @@ body {
   letter-spacing: 0.5px;
 }
 
-.settings-bar select, .custom-select {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--card-border);
-  border-radius: 8px;
-  color: var(--text-primary);
+.settings-bar select, .custom-select, select {
+  background: rgba(18, 18, 24, 0.95) !important;
+  border: 1px solid rgba(212, 175, 55, 0.4) !important;
+  border-radius: 10px;
+  color: #f8fafc !important;
   font-family: var(--font-body);
   font-size: 13px;
-  padding: 8px 12px;
+  font-weight: 600;
+  padding: 10px 14px;
   outline: none;
   cursor: pointer;
-  transition: background 0.2s, border-color 0.2s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  transition: all 0.25s ease;
 }
 
-.settings-bar select:focus, .custom-select:focus {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: var(--accent-primary);
+.settings-bar select:hover, .settings-bar select:focus, .custom-select:hover, .custom-select:focus, select:focus {
+  background: rgba(25, 25, 35, 1) !important;
+  border-color: var(--accent-gold) !important;
+  box-shadow: 0 0 16px rgba(212, 175, 55, 0.4) !important;
+}
+
+/* Explicit Dropdown Options High-Contrast Contrast Rules (Fixes invisible options) */
+select option, .settings-bar select option, .custom-select option {
+  background-color: #121218 !important;
+  color: #f8fafc !important;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 12px;
+}
+
+select option:hover, select option:focus, select option:checked {
+  background-color: #2a2215 !important;
+  color: #fbbf24 !important;
 }
 
 .maestro-coaching-banner {
