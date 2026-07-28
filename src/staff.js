@@ -194,17 +194,25 @@ export class MusicStaff {
     html += `<text x="32" y="92" fill="#818cf8" font-size="46" font-family="serif">𝄞</text>`;
     html += `<text x="32" y="174" fill="#818cf8" font-size="40" font-family="serif">𝄢</text>`;
 
-    // Key Signatures
+    // Key Signatures (Exact Standard Musical Engraving Coordinates)
     let keyX = 75;
     if (this.keyConfig.count > 0) {
       const isSharp = this.keyConfig.type === 'sharp';
       const symbol = isSharp ? '♯' : '♭';
+      
+      // Standard Treble Clef key signature positions
+      // Sharps: F5(52), C5(70), G5(46), D5(64), A4(82), E5(58), B4(76)
+      // Flats: B4(76), E5(58), A4(82), D5(64), G4(88), C5(70), F4(94)
       const treblePositions = isSharp ? [52, 70, 46, 64, 82, 58, 76] : [76, 58, 82, 64, 88, 70, 94];
-      const bassPositions = isSharp ? [160, 178, 154, 172, 190, 166, 184] : [184, 166, 190, 172, 196, 178, 202];
+      
+      // Standard Bass Clef key signature positions
+      // Sharps: F3(160), C3(178), G3(154), D3(172), A2(190), E3(166), B2(184)
+      // Flats: B2(184), E3(166), A2(190), D3(172), G3(154), C3(178), F3(160)
+      const bassPositions = isSharp ? [160, 178, 154, 172, 190, 166, 184] : [184, 166, 190, 172, 154, 178, 160];
 
       for (let i = 0; i < this.keyConfig.count; i++) {
-        html += `<text x="${keyX}" y="${treblePositions[i]}" fill="#a78bfa" font-size="18" font-weight="bold">${symbol}</text>`;
-        html += `<text x="${keyX}" y="${bassPositions[i]}" fill="#a78bfa" font-size="18" font-weight="bold">${symbol}</text>`;
+        html += `<text x="${keyX}" y="${treblePositions[i]}" fill="#fbbf24" font-size="18" font-weight="bold" dominant-baseline="central" text-anchor="middle">${symbol}</text>`;
+        html += `<text x="${keyX}" y="${bassPositions[i]}" fill="#fbbf24" font-size="18" font-weight="bold" dominant-baseline="central" text-anchor="middle">${symbol}</text>`;
         keyX += 14;
       }
     }
