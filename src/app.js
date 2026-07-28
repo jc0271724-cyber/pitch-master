@@ -1,9 +1,8 @@
-// AppController for PitchMaster
-
 import { MusicStaff, getNoteSpelling } from './staff.js';
 import { PitchTracker } from './pitch.js';
 import { synth } from './synth.js';
 import { ChoirTeacher, SATB_PIECES, WARMUP_ROUTINES } from './teacher.js';
+import { getSolfegeRuleExplanation } from './theory/solfege.js';
 
 const KEY_DATABASE = {
   'C_maj':  { name: 'C Major / A Minor', type: 'sharp', count: 0, rootMajor: 0, rootMinor: 9 },
@@ -44,6 +43,12 @@ export class AppController {
   init() {
     this.staff = new MusicStaff('music-staff');
     this.staff.draw();
+
+    // Clickable Staff Handler: Click on staff lines/spaces to play pitch and show solfege!
+    this.staff.onStaffClick = (midi) => {
+      const keyElem = document.querySelector(`.piano-key[data-midi="${midi}"]`);
+      this.playPianoKey(midi, keyElem);
+    };
 
     this.pitchTracker = new PitchTracker();
 
@@ -428,7 +433,8 @@ export class AppController {
 
     const maestroInfo = document.getElementById('maestro-key-info');
     if (maestroInfo) {
-      maestroInfo.innerHTML = `Key Center: <strong>${keyInfo.name}</strong> (${keyInfo.count} ${keyInfo.type}s)`;
+      const ruleText = getSolfegeRuleExplanation(this.currentKeyId);
+      maestroInfo.innerHTML = `<div style="font-size: 13px; line-height: 1.5; color: #f8fafc;">${ruleText}</div>`;
     }
   }
 

@@ -27,6 +27,58 @@ export class MusicStaff {
     
     this.SHARP_ORDER = ['F', 'C', 'G', 'D', 'A', 'E', 'B'];
     this.FLAT_ORDER = ['B', 'E', 'A', 'D', 'G', 'C', 'F'];
+    this.onStaffClick = null;
+
+    this.attachClickEvents();
+  }
+
+  attachClickEvents() {
+    if (!this.svg) this.svg = document.getElementById('music-staff');
+    if (!this.svg) return;
+
+    this.svg.style.cursor = 'pointer';
+    this.svg.addEventListener('click', (e) => {
+      const rect = this.svg.getBoundingClientRect();
+      const clickY = (e.clientY - rect.top) * (260 / rect.height);
+      const midi = this.yToMidi(clickY);
+      if (this.onStaffClick) {
+        this.onStaffClick(midi);
+      }
+    });
+  }
+
+  yToMidi(y) {
+    const totalStepFromC4 = Math.round((this.MID_C_Y - y) / (this.LINE_SPACING / 2));
+    const octaveOffset = Math.floor(totalStepFromC4 / 7);
+    let stepInOctave = (totalStepFromC4 % 7 + 7) % 7; // 0=C, 1=D, 2=E, 3=F, 4=G, 5=A, 6=B
+    const octave = 4 + octaveOffset;
+
+    const baseSemitones = [0, 2, 4, 5, 7, 9, 11];
+    let semitone = baseSemitones[stepInOctave];
+
+    const isSharpKey = this.keyConfig.type === 'sharp';
+    const count = this.keyConfig.count;
+
+    if (isSharpKey && count > 0) {
+      const sharpSteps = [3, 0, 4, 1, 5, 2, 6]; // F, C, G, D, A, E, B
+      for (let i = 0; i < count; i++) {
+        if (stepInOctave === sharpSteps[i]) {
+          semitone += 1;
+          break;
+        }
+      }
+    } else if (!isSharpKey && count > 0) {
+      const flatSteps = [6, 2, 5, 1, 4, 0, 3]; // B, E, A, D, G, C, F
+      for (let i = 0; i < count; i++) {
+        if (stepInOctave === flatSteps[i]) {
+          semitone -= 1;
+          break;
+        }
+      }
+    }
+
+    const midi = (octave + 1) * 12 + semitone;
+    return Math.max(36, Math.min(84, midi));
   }
 
   setKey(type, count) {

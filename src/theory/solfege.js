@@ -112,3 +112,24 @@ export function getNoteSpelling(midi, keyConfig = { type: 'sharp', count: 0 }) {
     pitchClass
   };
 }
+
+// Master Music Theory Rule Explanation for Key Signatures
+export function getSolfegeRuleExplanation(keyKey = 'C_maj') {
+  const key = KEY_SIGNATURES[keyKey] || KEY_SIGNATURES['C_maj'];
+  
+  if (key.count === 0) {
+    return `<strong>C Major (0 ♯/♭):</strong> C = <em>Do</em>, D = <em>Re</em>, E = <em>Mi</em>, F = <em>Fa</em>, G = <em>Sol</em>, A = <em>La</em>, B = <em>Ti</em>. Perfect natural scale.`;
+  }
+  
+  if (key.type === 'sharp') {
+    const lastSharps = ['F#', 'C#', 'G#', 'D#', 'A#', 'E#', 'B#'];
+    const lastSharp = lastSharps[key.count - 1];
+    return `<strong>Sharp Rule (${key.count} ♯):</strong> The LAST SHARP (<strong>${lastSharp}</strong>) is ALWAYS <em>Ti</em> (7th degree). Step up 1 half-step to find <em>Do</em> (<strong>${key.rootName}</strong>).`;
+  }
+  
+  const lastFlats = ['Bb', 'Eb', 'Ab', 'Db', 'Gb', 'Cb', 'Fb'];
+  const lastFlat = lastFlats[key.count - 1];
+  const secondToLast = key.count > 1 ? lastFlats[key.count - 2] : 'F';
+  return `<strong>Flat Rule (${key.count} ♭):</strong> The LAST FLAT (<strong>${lastFlat}</strong>) is ALWAYS <em>Fa</em> (4th degree). The 2nd-to-last flat (<strong>${secondToLast}</strong>) is <em>Do</em> (Tonic).`;
+}
+

@@ -146,58 +146,82 @@ export class MusicSynth {
       this.stopNote(midiNote);
     }
 
-    const now = this.audioCtx.currentTime;
+    const ctx = this.audioCtx;
+    const now = ctx.currentTime;
     const freq = this.midiToFreq(midiNote);
 
-    const osc1 = this.audioCtx.createOscillator();
-    osc1.type = 'sine';
-    osc1.frequency.setValueAtTime(freq, now);
+    // Steinway Grand Piano Harmonic Series (Fundamental + Overtones with natural string stiffness)
+    const harmonics = [
+      { ratio: 1.000, type: 'sine',     gain: 0.70 },
+      { ratio: 2.001, type: 'sine',     gain: 0.35 },
+      { ratio: 3.002, type: 'triangle', gain: 0.18 },
+      { ratio: 4.004, type: 'sine',     gain: 0.09 },
+      { ratio: 5.006, type: 'triangle', gain: 0.04 }
+    ];
 
-    const osc2 = this.audioCtx.createOscillator();
-    osc2.type = 'triangle';
-    osc2.frequency.setValueAtTime(freq * 2, now);
-
-    const osc3 = this.audioCtx.createOscillator();
-    osc3.type = 'sine';
-    osc3.frequency.setValueAtTime(freq * 3, now);
-
-    const osc1Gain = this.audioCtx.createGain();
-    const osc2Gain = this.audioCtx.createGain();
-    const osc3Gain = this.audioCtx.createGain();
-
-    osc1Gain.gain.setValueAtTime(0.6, now);
-    osc2Gain.gain.setValueAtTime(0.3, now);
-    osc3Gain.gain.setValueAtTime(0.1, now);
-
-    const filter = this.audioCtx.createBiquadFilter();
+    const oscNodes = [];
+    const filter = ctx.createBiquadFilter();
     filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(freq * 4, now);
-    filter.frequency.exponentialRampToValueAtTime(freq * 1.5, now + 1.2);
-    filter.Q.setValueAtTime(1.0, now);
+    // Dynamic brilliance: Higher notes have brighter initial cutoff, lower notes have richer body
+    const initialCutoff = Math.min(12000, Math.max(1200, freq * 7.5));
+    const sustainCutoff = Math.max(600, freq * 1.8);
+    filter.frequency.setValueAtTime(initialCutoff, now);
+    filter.frequency.exponentialRampToValueAtTime(sustainCutoff, now + 1.2);
+    filter.Q.setValueAtTime(1.2, now);
 
-    const noteGain = this.audioCtx.createGain();
+    const noteGain = ctx.createGain();
+    // Acoustic Piano Percussive Envelope (Instant hammer attack, natural sustain, damper decay)
     noteGain.gain.setValueAtTime(0, now);
-    noteGain.gain.linearRampToValueAtTime(0.8, now + 0.006);
-    noteGain.gain.exponentialRampToValueAtTime(0.35, now + 0.4);
+    noteGain.gain.linearRampToValueAtTime(0.85, now + 0.004);
+    noteGain.gain.exponentialRampToValueAtTime(0.40, now + 0.25);
 
-    osc1.connect(osc1Gain);
-    osc2.connect(osc2Gain);
-    osc3.connect(osc3Gain);
+    harmonics.forEach(h => {
+      const osc = ctx.createOscillator();
+      osc.type = h.type;
+      osc.frequency.setValueAtTime(freq * h.ratio, now);
 
-    osc1Gain.connect(filter);
-    osc2Gain.connect(filter);
-    osc3Gain.connect(filter);
+      const hGain = ctx.createGain();
+      hGain.gain.setValueAtTime(h.gain, now);
+
+      osc.connect(hGain);
+      hGain.connect(filter);
+      osc.start(now);
+      oscNodes.push(osc);
+    });
+
+    // Felt Hammer Strike Noise Transient
+    try {
+      const sampleRate = ctx.sampleRate;
+      const noiseBuffer = ctx.createBuffer(1, Math.ceil(sampleRate * 0.015), sampleRate);
+      const output = noiseBuffer.getChannelData(0);
+      for (let i = 0; i < output.length; i++) {
+        output[i] = (Math.random() * 2 - 1) * Math.exp(-i / (sampleRate * 0.003));
+      }
+      const hammerNoise = ctx.createBufferSource();
+      hammerNoise.buffer = noiseBuffer;
+
+      const hammerFilter = ctx.createBiquadFilter();
+      hammerFilter.type = 'bandpass';
+      hammerFilter.frequency.setValueAtTime(Math.min(4500, freq * 3.5), now);
+      hammerFilter.Q.setValueAtTime(2.0, now);
+
+      const hammerGain = ctx.createGain();
+      hammerGain.gain.setValueAtTime(0.25, now);
+
+      hammerNoise.connect(hammerFilter);
+      hammerFilter.connect(hammerGain);
+      hammerGain.connect(noteGain);
+      hammerNoise.start(now);
+    } catch (e) {
+      // Fallback if audio buffer creation fails
+    }
 
     filter.connect(noteGain);
     noteGain.connect(this.masterGain);
     noteGain.connect(this.delayNode);
 
-    osc1.start(now);
-    osc2.start(now);
-    osc3.start(now);
-
     this.activeNotes.set(midiNote, {
-      oscillators: [osc1, osc2, osc3],
+      oscillators: oscNodes,
       gain: noteGain,
       filter: filter,
       startTime: now
