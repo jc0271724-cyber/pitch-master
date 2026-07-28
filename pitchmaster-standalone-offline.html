@@ -155,29 +155,84 @@
     .vol-slider{width:130px;accent-color:var(--accent-purple)}
 
     /* === PIANO KEYBOARD === */
-    .keyboard-wrap{padding:14px;background:linear-gradient(180deg,#2a1a12,#170d09 60%,#0a0503);border:1px solid rgba(212,175,55,.4);border-top:3px solid #d4af37;border-radius:14px;box-shadow:inset 0 2px 10px rgba(0,0,0,.75),0 14px 40px rgba(0,0,0,.75);position:relative}
-    .keyboard-wrap::before{content:"✦ GRAND PIANO CONCERT EDITION ✦";display:block;text-align:center;font-family:var(--font-display);font-size:11px;font-weight:700;letter-spacing:3px;color:rgba(212,175,55,.9);margin-bottom:10px}
-    .piano-scroll{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:rgba(212,175,55,.3) transparent}
-    .piano-scroll::-webkit-scrollbar{height:4px}
-    .piano-scroll::-webkit-scrollbar-thumb{background:rgba(212,175,55,.35);border-radius:4px}
-    .piano-keyboard{display:flex;position:relative;height:175px;min-width:760px;user-select:none;-webkit-user-select:none}
-    .piano-key{position:relative;cursor:pointer;transition:all .08s ease-out}
-    /* White keys — taller to show note name at bottom */
-    .white-key{flex:1;height:100%;min-width:28px;max-width:40px;background:linear-gradient(180deg,#fff 0%,#faf6f0 70%,#ebe2d3 100%);border:1px solid #a8a29e;border-radius:0 0 6px 6px;box-shadow:inset 0 -4px 6px rgba(0,0,0,.1),0 4px 6px rgba(0,0,0,.3);z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:5px;gap:1px}
-    .white-key:hover{background:linear-gradient(180deg,#fff,#fef3c7)}
-    .white-key.active{background:linear-gradient(180deg,#fef08a,#d4af37)!important;box-shadow:inset 0 2px 6px rgba(0,0,0,.4),0 0 18px rgba(212,175,55,.95)!important}
-    /* Black keys — contain vertical label */
-    .black-key{width:24px;min-width:24px;height:60%;background:linear-gradient(180deg,#2a2a2a,#111 70%,#050505);border:1px solid #333;border-radius:0 0 5px 5px;box-shadow:inset 0 -2px 3px rgba(255,255,255,.12),0 6px 10px rgba(0,0,0,.75);z-index:2;margin-left:-12px;margin-right:-12px;position:relative;display:flex;align-items:flex-end;justify-content:center;padding-bottom:5px}
-    .black-key:hover{background:linear-gradient(180deg,#444,#222)}
-    .black-key.active{background:linear-gradient(180deg,#f43f5e,#be185d)!important;box-shadow:inset 0 2px 4px rgba(0,0,0,.5),0 0 18px rgba(244,63,94,.95)!important}
-    /* Key labels */
-    .key-lbl{font-size:8.5px;font-family:var(--font-mono);font-weight:700;color:#8a8276;pointer-events:none;user-select:none;line-height:1;text-align:center;display:block;white-space:nowrap}
-    .key-lbl-octave{font-size:7.5px;font-family:var(--font-mono);font-weight:600;color:#a09585;pointer-events:none;user-select:none;line-height:1;text-align:center;display:block}
-    .key-lbl-black{font-size:7px;font-family:var(--font-mono);font-weight:700;color:rgba(255,255,255,.45);pointer-events:none;user-select:none;writing-mode:vertical-rl;text-orientation:mixed;transform:rotate(180deg);line-height:1;letter-spacing:1px;white-space:nowrap}
-    .key-c-lbl .key-lbl{color:#a09070;font-weight:900}
-    .key-c-lbl .key-lbl-octave{color:#b0a080}
-    .key-middlec .key-lbl{color:#d4af37!important;font-weight:900!important}
-    .key-middlec .key-lbl-octave{color:#d4af37!important;font-weight:900!important}
+    .keyboard-wrap{padding:16px 14px 14px;background:linear-gradient(180deg,#1e1008,#100804 50%,#060302);border:2px solid rgba(212,175,55,.5);border-top:4px solid #d4af37;border-radius:16px;box-shadow:inset 0 2px 16px rgba(0,0,0,.8),0 16px 48px rgba(0,0,0,.8),0 0 40px rgba(212,175,55,.08);position:relative}
+    .keyboard-wrap::before{content:"✦ GRAND PIANO ✦";display:block;text-align:center;font-family:var(--font-display);font-size:10px;font-weight:700;letter-spacing:4px;color:rgba(212,175,55,.85);margin-bottom:12px}
+    .piano-scroll{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:rgba(212,175,55,.4) rgba(0,0,0,.3);padding-bottom:4px}
+    .piano-scroll::-webkit-scrollbar{height:5px}
+    .piano-scroll::-webkit-scrollbar-thumb{background:rgba(212,175,55,.4);border-radius:4px}
+    .piano-scroll::-webkit-scrollbar-track{background:rgba(0,0,0,.3);border-radius:4px}
+    .piano-keyboard{display:flex;position:relative;height:230px;min-width:820px;user-select:none;-webkit-user-select:none}
+    .piano-key{position:relative;cursor:pointer;transition:all .07s ease-out}
+
+    /* ── WHITE KEYS ── */
+    .white-key{
+      flex:1;height:100%;min-width:30px;max-width:44px;
+      background:linear-gradient(180deg,#f8f8f8 0%,#f0ece4 60%,#ddd5c4 100%);
+      border:1px solid #b0a898;
+      border-radius:0 0 8px 8px;
+      box-shadow:inset 0 -6px 10px rgba(0,0,0,.12),2px 4px 8px rgba(0,0,0,.35);
+      z-index:1;
+      display:flex;
+      align-items:flex-end;
+      justify-content:center;
+      padding-bottom:8px;
+    }
+    .white-key:hover{
+      background:linear-gradient(180deg,#fffef0,#fef9d0 60%,#fef0a0 100%);
+      box-shadow:inset 0 -6px 10px rgba(0,0,0,.1),2px 4px 8px rgba(0,0,0,.3),0 0 12px rgba(212,175,55,.25);
+    }
+    .white-key.active{
+      background:linear-gradient(180deg,#fef08a 0%,#f0c030 60%,#d4af37 100%)!important;
+      box-shadow:inset 0 3px 8px rgba(0,0,0,.35),0 0 22px rgba(212,175,55,1)!important;
+      transform:scaleY(.985);transform-origin:top center;
+    }
+
+    /* ── BLACK KEYS ── */
+    .black-key{
+      width:28px;min-width:28px;height:62%;
+      background:linear-gradient(180deg,#3a3a3a 0%,#1a1a1a 50%,#080808 100%);
+      border:1px solid #555;
+      border-bottom:2px solid #222;
+      border-radius:0 0 6px 6px;
+      box-shadow:inset 0 -3px 6px rgba(255,255,255,.15),inset 2px 0 4px rgba(0,0,0,.5),3px 6px 14px rgba(0,0,0,.85);
+      z-index:2;margin-left:-14px;margin-right:-14px;
+      position:relative;
+      display:flex;align-items:flex-end;justify-content:center;
+      padding-bottom:7px;
+    }
+    .black-key:hover{
+      background:linear-gradient(180deg,#555,#2a2a2a 50%,#111 100%);
+      box-shadow:inset 0 -3px 6px rgba(255,255,255,.2),3px 6px 14px rgba(0,0,0,.8),0 0 10px rgba(212,175,55,.15);
+    }
+    .black-key.active{
+      background:linear-gradient(180deg,#f43f5e 0%,#c0143a 60%,#8b0020 100%)!important;
+      box-shadow:inset 0 3px 6px rgba(0,0,0,.5),0 0 22px rgba(244,63,94,.9)!important;
+      transform:scaleY(.985);transform-origin:top center;
+    }
+
+    /* ── KEY LABELS ── */
+    /* Single inline label: "C4", "D#3" etc. */
+    .key-lbl{
+      font-size:10px;font-family:var(--font-mono);font-weight:800;
+      color:#6b6055;letter-spacing:0;
+      pointer-events:none;user-select:none;
+      white-space:nowrap;line-height:1;
+      text-align:center;display:block;
+    }
+    /* Black key label — horizontal, readable */
+    .key-lbl-black{
+      font-size:8px;font-family:var(--font-mono);font-weight:700;
+      color:rgba(255,255,255,.55);
+      pointer-events:none;user-select:none;
+      white-space:nowrap;line-height:1;
+      writing-mode:vertical-rl;text-orientation:mixed;
+      transform:rotate(180deg);
+      letter-spacing:0.5px;
+    }
+    /* C note highlight */
+    .key-c-lbl .key-lbl{color:#8a7055;font-weight:900}
+    /* Middle C gold */
+    .key-middlec .key-lbl{color:#d4af37!important;font-weight:900!important;text-shadow:0 0 8px rgba(212,175,55,.6)}
 
     /* === PANELS === */
     .panel{display:none}
@@ -1577,24 +1632,21 @@ function buildKeyboardHTML(startMidi, endMidi) {
   mids.filter(m=>positions[m].type==='white').forEach(m=>{
     const s=m%12;
     const oct=Math.floor(m/12)-1;
-    // Use key-appropriate note spelling
-    const noteLetter = NOTES_SHARP[s]; // e.g. 'C', 'D', 'E'
-    const isMidC = m===60;
-    const isC = s===0;
+    const noteLetter=NOTES_SHARP[s]; // e.g. 'C', 'D', 'E'
+    const isMidC=m===60;
+    const isC=s===0;
     const p=positions[m];
-    const extraClass = isMidC?' key-middlec':(isC?' key-c-lbl':'');
-    html+=`<div class="piano-key white-key${extraClass}" data-midi="${m}" style="position:absolute;left:${p.left.toFixed(3)}%;width:${(WHITE_W*0.97).toFixed(3)}%;height:100%">
-      <span class="key-lbl">${noteLetter}</span>
-      <span class="key-lbl-octave">${oct}</span>
-    </div>`;
+    const extraClass=isMidC?' key-middlec':(isC?' key-c-lbl':'');
+    // Single inline label: "C4" not "C" on top of "4"
+    html+=`<div class="piano-key white-key${extraClass}" data-midi="${m}" style="position:absolute;left:${p.left.toFixed(3)}%;width:${(WHITE_W*0.97).toFixed(3)}%;height:100%"><span class="key-lbl">${noteLetter}${oct}</span></div>`;
   });
-  // Black keys on top (with vertical note label)
+  // Black keys on top (vertical label: "C#4")
   mids.filter(m=>positions[m].type==='black').forEach(m=>{
     const s=m%12;
     const oct=Math.floor(m/12)-1;
-    const sharpNote=NOTES_SHARP[s]; // e.g. 'C♯'
+    const sharpNote=NOTES_SHARP[s];
     const p=positions[m];
-    html+=`<div class="piano-key black-key" data-midi="${m}" style="position:absolute;left:${p.left.toFixed(3)}%;width:${(BLACK_W*0.98).toFixed(3)}%;height:60%;z-index:2"><span class="key-lbl-black">${sharpNote}${oct}</span></div>`;
+    html+=`<div class="piano-key black-key" data-midi="${m}" style="position:absolute;left:${p.left.toFixed(3)}%;width:${(BLACK_W*0.98).toFixed(3)}%;height:62%;z-index:2"><span class="key-lbl-black">${sharpNote}${oct}</span></div>`;
   });
   return html;
 }
