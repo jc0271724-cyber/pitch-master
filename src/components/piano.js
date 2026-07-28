@@ -80,6 +80,16 @@ export class PianoKeyboard {
         <div class="piano-scroll-box">
           <div class="piano-keyboard">${keysHTML}</div>
         </div>
+        <div class="piano-scroll-track">
+          <span class="scroll-track-label">C2</span>
+          <input
+            type="range"
+            class="piano-scroll-slider"
+            min="0" max="1000" value="0"
+            aria-label="Scroll keyboard left or right"
+          />
+          <span class="scroll-track-label">C6</span>
+        </div>
       </div>
     `;
     this.attachEvents();
@@ -89,7 +99,31 @@ export class PianoKeyboard {
     const keyboardEl = this.container.querySelector('.piano-keyboard');
     const scrollBox = this.container.querySelector('.piano-scroll-box');
     const octPills = this.container.querySelectorAll('.oct-pill');
+    const scrollSlider = this.container.querySelector('.piano-scroll-slider');
     if (!keyboardEl) return;
+
+    // Helper: sync slider thumb to current scroll position
+    const syncSliderToScroll = () => {
+      if (!scrollBox || !scrollSlider) return;
+      const maxScroll = scrollBox.scrollWidth - scrollBox.clientWidth;
+      if (maxScroll <= 0) return;
+      const pct = scrollBox.scrollLeft / maxScroll;
+      scrollSlider.value = Math.round(pct * 1000);
+    };
+
+    // Slider → scroll box
+    if (scrollSlider) {
+      scrollSlider.addEventListener('input', () => {
+        if (!scrollBox) return;
+        const maxScroll = scrollBox.scrollWidth - scrollBox.clientWidth;
+        scrollBox.scrollLeft = (parseInt(scrollSlider.value, 10) / 1000) * maxScroll;
+      });
+    }
+
+    // Scroll box → slider (keeps thumb in sync when swiping or using pills)
+    if (scrollBox) {
+      scrollBox.addEventListener('scroll', syncSliderToScroll, { passive: true });
+    }
 
     // Octave focus switching for mobile screens
     octPills.forEach(pill => {
@@ -110,6 +144,8 @@ export class PianoKeyboard {
         } else {
           scrollBox.scrollLeft = 0;
         }
+        // Sync slider after pill-driven scroll
+        setTimeout(syncSliderToScroll, 50);
       });
     });
 
