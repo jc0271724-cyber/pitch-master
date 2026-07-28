@@ -5,7 +5,7 @@ export class QRModalComponent {
   constructor(container) {
     this.container = typeof container === 'string' ? document.getElementById(container) : container;
     this.lanIp = null;
-    this.publicTunnelUrl = 'https://smart-spiders-ring.loca.lt';
+    this.publicTunnelUrl = 'https://jc0271724-cyber.github.io/pitch-master/';
     this.detectLanIP();
   }
 
