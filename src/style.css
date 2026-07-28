@@ -98,8 +98,11 @@ body {
 }
 
 .header-logo {
-  width: 48px;
-  height: 48px;
+  width: 44px !important;
+  height: 44px !important;
+  max-width: 44px !important;
+  max-height: 44px !important;
+  flex-shrink: 0 !important;
   filter: drop-shadow(0 0 12px rgba(212, 175, 55, 0.6));
 }
 
