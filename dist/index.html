@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PitchMaster - Sing & Read Music</title>
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Learn to read sheet music, sing on pitch, master movable Do solfege, chromatic choir pitch pipe, and SATB sectionals with real-time feedback using PitchMaster.">
+  <meta name="theme-color" content="#09090b">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700;800&family=Plus+Jakarta+Sans:wght@700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+
+  <script type="module" crossorigin src="./assets/index-DK5yHOGp.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-sEkSrsTu.css">
+</head>
+<body>
+
+  <div class="app-container">
+
+    <!-- Top Header -->
+    <header class="app-header">
+      <div class="logo-area">
+        <svg xmlns="http://www.w3.org/2000/svg" class="header-logo" viewBox="0 0 512 512" fill="none">
+          <circle cx="256" cy="256" r="220" fill="url(#logoBg)" />
+          <path d="M 120 256 Q 160 216 200 256 T 280 256 T 360 256 T 440 256" stroke="#ffffff" stroke-width="12" stroke-linecap="round" opacity="0.8" />
+          <g transform="translate(196, 120)">
+            <path d="M 30 160 C 30 130, 80 130, 80 160 C 80 190, 30 190, 30 160 Z" fill="#ffffff" />
+            <path d="M 95 160 C 95 130, 145 130, 145 160 C 145 190, 95 190, 95 160 Z" fill="#ffffff" />
+            <path d="M 70 160 L 70 30 L 135 45 L 135 160" stroke="#ffffff" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" />
+          </g>
+          <defs>
+            <linearGradient id="logoBg" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#4f46e5" />
+              <stop offset="100%" stop-color="#ec4899" />
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="brand">
+          <h1>PitchMaster</h1>
+          <p>Sing & Read Music</p>
+        </div>
+      </div>
+
+      <!-- Top Settings Bar -->
+      <div class="settings-bar">
+        <div class="setting-item">
+          <label for="key-select">KEY SIGNATURE</label>
+          <select id="key-select">
+            <option value="C_maj">C Major / A Minor (0 ♯/♭)</option>
+            <option value="G_maj">G Major / E Minor (1 ♯)</option>
+            <option value="D_maj">D Major / B Minor (2 ♯)</option>
+            <option value="A_maj">A Major / F# Minor (3 ♯)</option>
+            <option value="E_maj">E Major / C# Minor (4 ♯)</option>
+            <option value="B_maj">B Major / G# Minor (5 ♯)</option>
+            <option value="F#_maj">F# Major / D# Minor (6 ♯)</option>
+            <option value="C#_maj">C# Major / A# Minor (7 ♯)</option>
+            <option value="F_maj">F Major / D Minor (1 ♭)</option>
+            <option value="Bb_maj">Bb Major / G Minor (2 ♭)</option>
+            <option value="Eb_maj">Eb Major / C Minor (3 ♭)</option>
+            <option value="Ab_maj">Ab Major / F Minor (4 ♭)</option>
+            <option value="Db_maj">Db Major / Bb Minor (5 ♭)</option>
+            <option value="Gb_maj">Gb Major / Eb Minor (6 ♭)</option>
+            <option value="Cb_maj">Cb Major / Ab Minor (7 ♭)</option>
+          </select>
+        </div>
+
+        <div class="setting-item">
+          <label for="mode-select">SOLFEGE SYSTEM</label>
+          <select id="mode-select">
+            <option value="major">Movable Do (Major Key)</option>
+            <option value="minor-la">La-Based Minor (Choir Standard)</option>
+            <option value="minor-do">Do-Based Minor (Sight-Singing)</option>
+          </select>
+        </div>
+
+        <button class="btn btn-secondary" id="open-qr-btn">
+          📱 Phone Access (QR Code)
+        </button>
+      </div>
+    </header>
+
+    <!-- Maestro Live Vocal Coach Banner -->
+    <div class="maestro-coaching-banner glass-card" id="maestro-coaching-banner">
+      <div class="maestro-avatar-box">
+        <span class="maestro-avatar-emoji">👨‍🎤</span>
+        <div class="maestro-status-dot pulse"></div>
+      </div>
+      <div class="maestro-coaching-content">
+        <div class="maestro-header-line">
+          <h4>Maestro Choir Director</h4>
+          <button id="btn-toggle-speech" class="speech-toggle-btn active" title="Toggle Spoken Feedback">
+            🗣️ Speech Feedback: <span id="lbl-speech-status">ON</span>
+          </button>
+        </div>
+        <p id="lbl-maestro-tip" class="maestro-tip-text">"Welcome singer! Choose a warm-up or pitch exercise, start your mic, and let's make music together!"</p>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="tabs" role="tablist" aria-label="PitchMaster Navigation Tabs">
+      <button id="tab-freeplay" class="tab-button active" role="tab" aria-selected="true" data-tab="freeplay">Free Play / Sight Reading</button>
+      <button id="tab-pitchpipe" class="tab-button" role="tab" aria-selected="false" data-tab="pitchpipe">🔊 Pitch Pipe Wheel</button>
+      <button id="tab-warmup" class="tab-button" role="tab" aria-selected="false" data-tab="warmup">🧘 Vocal Warm-ups</button>
+      <button id="tab-satb" class="tab-button" role="tab" aria-selected="false" data-tab="satb">🎶 SATB Sectionals</button>
+      <button id="tab-academy" class="tab-button" role="tab" aria-selected="false" data-tab="academy">🎓 Sight-Singing Academy</button>
+      <button id="tab-practice" class="tab-button" role="tab" aria-selected="false" data-tab="practice">🎯 Pitch Match Training</button>
+      <button id="tab-solfege" class="tab-button" role="tab" aria-selected="false" data-tab="solfege">🎼 Hand Signs & Solfege</button>
+    </div>
+
+    <!-- Main Sheet Music Board (Grand Staff) -->
+    <section class="staff-container glass-card" id="staff-section">
+      <svg id="music-staff" viewBox="0 0 800 260" preserveAspectRatio="xMidYMid meet"></svg>
+    </section>
+
+    <!-- Dynamic Dashboard Panels -->
+    <section class="dashboard-grid">
+
+      <!-- Live Vocal Mic Input Card -->
+      <div class="glass-card stat-card feedback-card">
+        <h3>VOCAL MIC INPUT</h3>
+        <div class="tuner-container">
+          <div class="tuner-gauge">
+            <div class="tuner-scale"></div>
+            <div id="tuner-needle" class="tuner-needle"></div>
+            <div class="tuner-center-marker"></div>
+          </div>
+          <div class="tuner-status">
+            <div class="note-display">
+              <span id="lbl-voice-note" class="note-value">—</span>
+              <span id="lbl-voice-solfege" class="solfege-value">—</span>
+            </div>
+            <div class="metric-row">
+              <div class="metric">
+                <span class="metric-label">FREQUENCY</span>
+                <span id="lbl-voice-freq" class="metric-value">—</span>
+              </div>
+              <div class="metric">
+                <span class="metric-label">DEVIATION</span>
+                <span id="lbl-voice-cents" class="metric-value">0¢</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Played Piano Note Card -->
+      <div class="glass-card stat-card feedback-card" id="piano-note-panel">
+        <h3>PIANO KEYBOARD NOTE</h3>
+        <div class="piano-status-display">
+          <div class="note-display">
+            <span id="lbl-piano-note" class="note-value">—</span>
+            <span id="lbl-piano-solfege" class="solfege-value">—</span>
+          </div>
+          <p class="guide-text">Click keys, drag across them, or use your computer keyboard: row <strong>A S D F G H J K L ;</strong> (white keys) and <strong>W E T Y U O P</strong> (black keys).</p>
+        </div>
+      </div>
+
+      <!-- Vocal Warm-up Panel -->
+      <div id="warmup-panel" class="glass-card stat-card target-card hidden">
+        <div class="target-card-header">
+          <h3>Choir Warm-up Routine</h3>
+        </div>
+        <div class="warmup-select-container">
+          <select id="select-warmup-routine" class="full-width-select"></select>
+        </div>
+        <p id="lbl-warmup-desc" class="guide-text" style="margin: 8px 0; color: #a1a1aa;"></p>
+        <div class="target-actions">
+          <button id="btn-start-warmup" class="btn btn-primary">▶ Start Warm-up</button>
+          <button id="btn-demo-warmup" class="btn btn-secondary">🗣️ Maestro Demo</button>
+        </div>
+      </div>
+
+      <!-- SATB Sectional Panel -->
+      <div id="satb-panel" class="glass-card stat-card target-card hidden">
+        <div class="target-card-header">
+          <h3>SATB Choir Sectionals</h3>
+        </div>
+        <div class="satb-select-container">
+          <label>Piece:
+            <select id="select-satb-piece" class="full-width-select"></select>
+          </label>
+          <label style="margin-top:8px; display:block;">My Voice Section:
+            <select id="select-user-voice" class="full-width-select">
+              <option value="soprano">Soprano (High Treble)</option>
+              <option value="alto">Alto (Mid Treble)</option>
+              <option value="tenor" selected>Tenor (High Bass / Low Treble)</option>
+              <option value="bass">Bass (Deep Bass)</option>
+            </select>
+          </label>
+        </div>
+        <div class="satb-mix-sliders" style="margin-top:12px;">
+          <div class="satb-slider-item"><span>Soprano</span><input type="range" id="vol-soprano" min="0" max="1" step="0.1" value="1"></div>
+          <div class="satb-slider-item"><span>Alto</span><input type="range" id="vol-alto" min="0" max="1" step="0.1" value="1"></div>
+          <div class="satb-slider-item"><span>Tenor</span><input type="range" id="vol-tenor" min="0" max="1" step="0.1" value="1"></div>
+          <div class="satb-slider-item"><span>Bass</span><input type="range" id="vol-bass" min="0" max="1" step="0.1" value="1"></div>
+        </div>
+        <div class="target-actions" style="margin-top:12px;">
+          <button id="btn-play-satb" class="btn btn-primary">🎼 Play SATB Piece</button>
+          <button id="btn-sing-satb" class="btn btn-secondary">🎙️ Sing My Part</button>
+        </div>
+      </div>
+
+      <!-- Practice Mode / Target Card -->
+      <div id="practice-panel" class="glass-card stat-card target-card hidden">
+        <div class="target-card-header">
+          <h3>Practice Target</h3>
+          <span class="score-badge">Score: <strong id="lbl-score">0</strong></span>
+        </div>
+        <div class="target-display" id="target-card">
+          <svg class="progress-ring" width="100" height="100">
+            <circle class="progress-ring-bg" cx="50" cy="50" r="35" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6"/>
+            <circle id="target-match-ring" class="progress-ring-fill" cx="50" cy="50" r="35" fill="none" stroke="#10b981" stroke-width="6" stroke-dasharray="220" stroke-dashoffset="220"/>
+          </svg>
+          <div class="target-info">
+            <span id="lbl-target-note" class="target-note-val">—</span>
+            <span id="lbl-target-solfege" class="target-solfege-val">—</span>
+          </div>
+        </div>
+        <div class="target-actions">
+          <button id="btn-play-target" class="btn btn-secondary">Hear Note</button>
+        </div>
+      </div>
+
+      <!-- Melody Sight-Reading Card -->
+      <div id="melody-panel" class="glass-card stat-card target-card hidden">
+        <div class="target-card-header">
+          <h3>Melody Progress</h3>
+          <span class="score-badge">Note <strong id="lbl-melody-pos">1</strong>/<span id="lbl-melody-len">8</span> · Done <strong id="lbl-melody-done">0</strong></span>
+        </div>
+        <div class="melody-config">
+          <label class="melody-config-item">Level
+            <select id="melody-level">
+              <option value="1" selected>1 · Quarters & Halves</option>
+              <option value="2">2 · Eighth Notes</option>
+              <option value="3">3 · Dotted & Syncopated</option>
+            </select>
+          </label>
+          <label class="melody-config-item">Tempo
+            <select id="melody-tempo">
+              <option value="60">60 BPM</option>
+              <option value="72">72 BPM</option>
+              <option value="84" selected>84 BPM</option>
+              <option value="96">96 BPM</option>
+            </select>
+          </label>
+        </div>
+        <div class="melody-status">
+          <span id="lbl-melody-note" class="target-note-val">—</span>
+          <span id="lbl-melody-solfege" class="target-solfege-val">—</span>
+        </div>
+        <div class="target-actions melody-actions">
+          <button id="btn-play-melody" class="btn btn-secondary">Play Melody</button>
+          <button id="btn-sing-melody" class="btn btn-secondary">🎵 Sing Solfege</button>
+          <button id="btn-count-melody" class="btn btn-secondary">🗣️ Count Beats</button>
+          <button id="btn-hear-current" class="btn btn-secondary">Hear Note</button>
+          <button id="btn-new-melody" class="btn btn-secondary">New Melody</button>
+        </div>
+      </div>
+
+      <!-- Maestro Theory Guide Card -->
+      <div class="glass-card stat-card maestro-card">
+        <h3>🎓 Maestro · Theory Guide</h3>
+        <div id="maestro-key-info" class="maestro-info"></div>
+        <div id="maestro-note-info" class="maestro-note"></div>
+        <div class="target-actions melody-actions">
+          <button id="btn-sing-scale" class="btn btn-secondary">🎼 Sing the Scale</button>
+          <button id="btn-sing-triad" class="btn btn-secondary">🎶 Sing the Triad</button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Pitch Pipe Wheel View (Mounted dynamically or displayed when pitchpipe tab active) -->
+    <section class="tab-content-panel hidden" id="panel-pitchpipe">
+      <div id="pitchpipe-wheel-container"></div>
+    </section>
+
+    <!-- Solfege Hand Signs View -->
+    <section class="tab-content-panel hidden" id="panel-solfege">
+      <div id="solfege-cards-container"></div>
+    </section>
+
+    <!-- Mic Audio Controls & Volume Bar -->
+    <section class="audio-control-panel glass-card">
+      <button id="btn-mic" class="btn btn-primary">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+        </svg>
+        Start Microphone
+      </button>
+
+      <div class="volume-control">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon volume-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+        </svg>
+        <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="0.75" class="volume-slider">
+      </div>
+    </section>
+
+    <!-- 49-Key Interactive Piano Keyboard Wrapper (C2 to C6) -->
+    <section class="keyboard-container glass-card">
+      <div class="piano-keyboard">
+        <!-- OCTAVE 2 (MIDI 36 - 47) -->
+        <div class="piano-key white-key" data-midi="36"><span class="key-note-label">C2</span></div>
+        <div class="piano-key black-key" data-midi="37"></div>
+        <div class="piano-key white-key" data-midi="38"><span class="key-note-label">D2</span></div>
+        <div class="piano-key black-key" data-midi="39"></div>
+        <div class="piano-key white-key" data-midi="40"><span class="key-note-label">E2</span></div>
+        <div class="piano-key white-key" data-midi="41"><span class="key-note-label">F2</span></div>
+        <div class="piano-key black-key" data-midi="42"></div>
+        <div class="piano-key white-key" data-midi="43"><span class="key-note-label">G2</span></div>
+        <div class="piano-key black-key" data-midi="44"></div>
+        <div class="piano-key white-key" data-midi="45"><span class="key-note-label">A2</span></div>
+        <div class="piano-key black-key" data-midi="46"></div>
+        <div class="piano-key white-key" data-midi="47"><span class="key-note-label">B2</span></div>
+
+        <!-- OCTAVE 3 (MIDI 48 - 59) -->
+        <div class="piano-key white-key" data-midi="48"><span class="key-note-label">C3</span></div>
+        <div class="piano-key black-key" data-midi="49"></div>
+        <div class="piano-key white-key" data-midi="50"><span class="key-note-label">D3</span></div>
+        <div class="piano-key black-key" data-midi="51"></div>
+        <div class="piano-key white-key" data-midi="52"><span class="key-note-label">E3</span></div>
+        <div class="piano-key white-key" data-midi="53"><span class="key-note-label">F3</span></div>
+        <div class="piano-key black-key" data-midi="54"></div>
+        <div class="piano-key white-key" data-midi="55"><span class="key-note-label">G3</span></div>
+        <div class="piano-key black-key" data-midi="56"></div>
+        <div class="piano-key white-key" data-midi="57"><span class="key-note-label">A3</span></div>
+        <div class="piano-key black-key" data-midi="58"></div>
+        <div class="piano-key white-key" data-midi="59"><span class="key-note-label">B3</span></div>
+
+        <!-- OCTAVE 4 (Middle C) (MIDI 60 - 71) -->
+        <div class="piano-key white-key middle-c" data-midi="60"><span class="key-note-label">C4</span></div>
+        <div class="piano-key black-key" data-midi="61"></div>
+        <div class="piano-key white-key" data-midi="62"><span class="key-note-label">D4</span></div>
+        <div class="piano-key black-key" data-midi="63"></div>
+        <div class="piano-key white-key" data-midi="64"><span class="key-note-label">E4</span></div>
+        <div class="piano-key white-key" data-midi="65"><span class="key-note-label">F4</span></div>
+        <div class="piano-key black-key" data-midi="66"></div>
+        <div class="piano-key white-key" data-midi="67"><span class="key-note-label">G4</span></div>
+        <div class="piano-key black-key" data-midi="68"></div>
+        <div class="piano-key white-key" data-midi="69"><span class="key-note-label">A4</span></div>
+        <div class="piano-key black-key" data-midi="70"></div>
+        <div class="piano-key white-key" data-midi="71"><span class="key-note-label">B4</span></div>
+
+        <!-- OCTAVE 5 (MIDI 72 - 83) -->
+        <div class="piano-key white-key" data-midi="72"><span class="key-note-label">C5</span></div>
+        <div class="piano-key black-key" data-midi="73"></div>
+        <div class="piano-key white-key" data-midi="74"><span class="key-note-label">D5</span></div>
+        <div class="piano-key black-key" data-midi="75"></div>
+        <div class="piano-key white-key" data-midi="76"><span class="key-note-label">E5</span></div>
+        <div class="piano-key white-key" data-midi="77"><span class="key-note-label">F5</span></div>
+        <div class="piano-key black-key" data-midi="78"></div>
+        <div class="piano-key white-key" data-midi="79"><span class="key-note-label">G5</span></div>
+        <div class="piano-key black-key" data-midi="80"></div>
+        <div class="piano-key white-key" data-midi="81"><span class="key-note-label">A5</span></div>
+        <div class="piano-key black-key" data-midi="82"></div>
+        <div class="piano-key white-key" data-midi="83"><span class="key-note-label">B5</span></div>
+
+        <!-- OCTAVE 6 (MIDI 84) -->
+        <div class="piano-key white-key" data-midi="84"><span class="key-note-label">C6</span></div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Performance Report Card Modal -->
+  <div id="report-modal" class="modal-overlay hidden">
+    <div class="modal-card glass-card">
+      <canvas id="confetti-canvas" class="confetti-canvas"></canvas>
+      <div class="modal-header">
+        <h2>🎉 Choir Performance Evaluation</h2>
+        <span class="report-badge-level" id="report-level-name">Level Complete</span>
+      </div>
+      <div class="grade-container">
+        <div id="report-grade-circle" class="grade-circle">S</div>
+        <div class="grade-text-group">
+          <h3 id="report-title">Master Choir Vocalist</h3>
+          <p id="report-summary">Flawless intonation and pitch placement! Outstanding choir performance.</p>
+        </div>
+      </div>
+      <div class="report-metrics-grid">
+        <div class="report-metric-box">
+          <span class="metric-val" id="report-accuracy">98%</span>
+          <span class="metric-lbl">Pitch Accuracy</span>
+        </div>
+        <div class="report-metric-box">
+          <span class="metric-val" id="report-cents">±4¢</span>
+          <span class="metric-lbl">Intonation Drift</span>
+        </div>
+        <div class="report-metric-box">
+          <span class="metric-val" id="report-notes">8 / 8</span>
+          <span class="metric-lbl">Notes Matched</span>
+        </div>
+      </div>
+      <div class="report-recommendation-box">
+        <strong>💡 Maestro's Recommendation:</strong>
+        <p id="report-recommendation">Challenge yourself with higher level sight-reading or multi-part SATB sectionals.</p>
+      </div>
+      <div class="modal-actions">
+        <button id="btn-close-report" class="btn btn-primary">Continue Practice</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- QR Code Modal Container -->
+  <div id="qr-modal-container"></div>
+
+</body>
+</html>
