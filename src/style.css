@@ -1,27 +1,31 @@
-/* PitchMaster - Unified Choir & Sight-Reading Companion CSS */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700;800&family=Plus+Jakarta+Sans:wght@700&family=Space+Grotesk:wght@500;700&display=swap');
+/* PitchMaster - Concert Grand Piano Exclusive Edition CSS */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700;800&family=Space+Grotesk:wght@500;700&display=swap');
 
 :root {
-  --bg-primary: #09090b;
-  --bg-secondary: #121216;
-  --card-bg: rgba(20, 20, 25, 0.65);
-  --card-border: rgba(255, 255, 255, 0.08);
-  --card-glow: rgba(99, 102, 241, 0.15);
+  --bg-primary: #070709;
+  --bg-secondary: #0d0d12;
+  --card-bg: rgba(12, 12, 16, 0.85);
+  --card-border: rgba(212, 175, 55, 0.22);
+  --card-glow: rgba(212, 175, 55, 0.18);
 
-  --accent-primary: #6366f1;
-  --accent-primary-hover: #4f46e5;
+  --accent-gold: #d4af37;
+  --accent-gold-light: #fef08a;
+  --gold-gradient: linear-gradient(135deg, #fffbeb 0%, #fef08a 25%, #d4af37 70%, #9a7b1c 100%);
+  --gold-button-gradient: linear-gradient(135deg, #d4af37 0%, #b48a1d 100%);
+
+  --accent-primary: #818cf8;
+  --accent-primary-hover: #6366f1;
   --accent-secondary: #c084fc;
   --accent-success: #10b981;
-  --accent-error: #ef4444;
-  --accent-warning: #f59e0b;
-  --color-accent-pink: #f43f5e;
-  --color-accent-gold: #fbbf24;
+  --accent-error: #f43f5e;
+  --accent-warning: #fbbf24;
 
-  --text-primary: #f4f4f5;
-  --text-secondary: #a1a1aa;
-  --text-muted: #71717a;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #64748b;
+  --text-gold: #fbbf24;
 
-  --font-display: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  --font-display: 'Cinzel', 'Outfit', serif;
   --font-body: 'Inter', sans-serif;
   --font-mono: 'Space Grotesk', monospace;
 
@@ -40,8 +44,9 @@
 body {
   background-color: var(--bg-primary);
   background-image: 
-    radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
-    radial-gradient(circle at 90% 80%, rgba(192, 132, 252, 0.12) 0%, transparent 40%);
+    radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 10% 30%, rgba(99, 102, 241, 0.12) 0%, transparent 45%),
+    radial-gradient(circle at 90% 80%, rgba(244, 63, 94, 0.08) 0%, transparent 45%);
   background-attachment: fixed;
   color: var(--text-primary);
   font-family: var(--font-body);
@@ -54,7 +59,7 @@ body {
 
 .app-container {
   width: 100%;
-  max-width: 1080px;
+  max-width: 1100px;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -62,18 +67,18 @@ body {
 
 .glass-card, .glass-panel {
   background: var(--card-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--card-border);
   border-radius: 16px;
   padding: 20px;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.6), 0 0 1px rgba(212, 175, 55, 0.3);
   transition: border-color 0.3s, box-shadow 0.3s;
 }
 
 .glass-card:hover, .glass-panel:hover {
-  border-color: rgba(255, 255, 255, 0.12);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45), 0 0 16px var(--card-glow);
+  border-color: rgba(212, 175, 55, 0.45);
+  box-shadow: 0 16px 48px 0 rgba(0, 0, 0, 0.7), 0 0 24px var(--card-glow);
 }
 
 .app-header {
@@ -82,35 +87,40 @@ body {
   align-items: center;
   flex-wrap: wrap;
   gap: 16px;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+  padding-bottom: 14px;
 }
 
 .logo-area {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 
 .header-logo {
-  width: 44px;
-  height: 44px;
-  filter: drop-shadow(0 0 8px var(--accent-primary));
+  width: 48px;
+  height: 48px;
+  filter: drop-shadow(0 0 12px rgba(212, 175, 55, 0.6));
 }
 
 .brand h1 {
   font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 24px;
+  font-weight: 900;
+  font-size: 26px;
   line-height: 1.1;
-  background: linear-gradient(135deg, #ffffff 0%, #a5b4fc 100%);
+  letter-spacing: 1px;
+  background: var(--gold-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 10px rgba(212, 175, 55, 0.2);
 }
 
 .brand p {
-  font-size: 12px;
-  color: var(--text-secondary);
-  letter-spacing: 0.5px;
+  font-size: 11px;
+  color: var(--text-gold);
+  letter-spacing: 1.5px;
   text-transform: uppercase;
+  font-weight: 600;
 }
 
 .settings-bar {
@@ -155,8 +165,9 @@ body {
   display: flex;
   align-items: center;
   gap: 16px;
-  background: linear-gradient(135deg, rgba(79, 70, 229, 0.2) 0%, rgba(236, 72, 153, 0.15) 100%);
-  border: 1px solid rgba(165, 180, 252, 0.2);
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.12) 0%, rgba(20, 20, 28, 0.9) 60%, rgba(244, 63, 94, 0.1) 100%);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  box-shadow: inset 0 1px 0 rgba(254, 240, 138, 0.3);
 }
 
 .maestro-avatar-box {
@@ -164,7 +175,8 @@ body {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(212, 175, 55, 0.15);
+  border: 1px solid rgba(212, 175, 55, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -179,6 +191,7 @@ body {
   height: 10px;
   border-radius: 50%;
   background: var(--accent-success);
+  box-shadow: 0 0 8px var(--accent-success);
 }
 
 .maestro-coaching-content { flex: 1; }
@@ -192,8 +205,10 @@ body {
 
 .maestro-header-line h4 {
   font-family: var(--font-display);
-  font-size: 15px;
-  color: #a5b4fc;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-gold);
+  letter-spacing: 0.5px;
 }
 
 .speech-toggle-btn {
@@ -214,32 +229,42 @@ body {
 
 .tabs {
   display: flex;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--card-border);
-  border-radius: 12px;
-  padding: 4px;
+  background: rgba(10, 10, 14, 0.9);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 14px;
+  padding: 5px;
+  gap: 4px;
   overflow-x: auto;
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.6);
 }
 
 .tab-button {
   flex: 1;
   background: transparent;
-  border: none;
-  border-radius: 8px;
+  border: 1px solid transparent;
+  border-radius: 10px;
   color: var(--text-secondary);
   font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 13px;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.5px;
   padding: 10px 14px;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.2s, color 0.2s;
+  transition: all 0.25s ease;
 }
 
 .tab-button.active {
-  background: var(--accent-primary);
-  color: var(--text-primary);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  background: var(--gold-button-gradient);
+  color: #0c0c10;
+  border-color: rgba(254, 240, 138, 0.6);
+  box-shadow: 0 4px 16px rgba(212, 175, 55, 0.35);
+}
+
+.tab-button:hover:not(.active) {
+  color: #ffffff;
+  background: rgba(212, 175, 55, 0.1);
+  border-color: rgba(212, 175, 55, 0.2);
 }
 
 .staff-container {
@@ -247,8 +272,19 @@ body {
   justify-content: center;
   align-items: center;
   overflow: hidden;
-  background: linear-gradient(180deg, rgba(20, 20, 25, 0.8) 0%, rgba(10, 10, 15, 0.9) 100%);
-  padding: 10px;
+  background: linear-gradient(180deg, rgba(14, 14, 20, 0.95) 0%, rgba(7, 7, 10, 0.98) 100%);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  box-shadow: inset 0 0 40px rgba(0,0,0,0.8), 0 8px 30px rgba(0,0,0,0.6);
+  padding: 12px;
+  position: relative;
+}
+
+.staff-container::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--gold-gradient);
 }
 
 #music-staff {
@@ -403,14 +439,32 @@ body {
 }
 
 .keyboard-container {
-  padding: 12px;
-  overflow: hidden;
+  padding: 16px;
+  background: linear-gradient(180deg, #2a1a12 0%, #170d09 60%, #0a0503 100%);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  border-top: 3px solid #d4af37;
+  border-radius: 14px;
+  box-shadow: inset 0 2px 10px rgba(0,0,0,0.8), 0 14px 40px rgba(0,0,0,0.8);
+  position: relative;
+}
+
+.keyboard-container::before {
+  content: "✦ GRAND PIANO CONCERT EDITION ✦";
+  display: block;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: rgba(212, 175, 55, 0.9);
+  margin-bottom: 12px;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.9);
 }
 
 .piano-keyboard {
   display: flex;
   position: relative;
-  height: 150px;
+  height: 155px;
   width: 100%;
   user-select: none;
 }
@@ -418,15 +472,16 @@ body {
 .piano-key {
   position: relative;
   cursor: pointer;
-  transition: background 0.1s;
+  transition: all 0.08s ease-out;
 }
 
 .white-key {
   width: var(--keyboard-white-width);
   height: 100%;
-  background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
-  border: 1px solid #94a3b8;
-  border-radius: 0 0 6px 6px;
+  background: linear-gradient(180deg, #ffffff 0%, #faf6f0 75%, #ebe2d3 100%);
+  border: 1px solid #a8a29e;
+  border-radius: 0 0 5px 5px;
+  box-shadow: inset 0 -4px 6px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.3);
   z-index: 1;
   display: flex;
   align-items: flex-end;
@@ -434,28 +489,41 @@ body {
   padding-bottom: 8px;
 }
 
-.white-key:hover { background: #cbd5e1; }
-.white-key.active { background: #818cf8 !important; }
+.white-key:hover {
+  background: linear-gradient(180deg, #ffffff 0%, #fef3c7 100%);
+}
+
+.white-key.active {
+  background: linear-gradient(180deg, #fef08a 0%, #d4af37 100%) !important;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.4), 0 0 18px rgba(212, 175, 55, 0.95) !important;
+}
 
 .black-key {
   width: var(--keyboard-black-width);
   height: 60%;
-  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
-  border: 1px solid #475569;
+  background: linear-gradient(180deg, #333333 0%, #171717 70%, #050505 100%);
+  border: 1px solid #44403c;
   border-radius: 0 0 4px 4px;
+  box-shadow: inset 0 -2px 3px rgba(255,255,255,0.15), 0 6px 10px rgba(0,0,0,0.8);
   z-index: 2;
   margin-left: var(--keyboard-black-margin);
   margin-right: var(--keyboard-black-margin);
 }
 
-.black-key:hover { background: #334155; }
-.black-key.active { background: #ec4899 !important; }
+.black-key:hover {
+  background: linear-gradient(180deg, #444444 0%, #222222 100%);
+}
+
+.black-key.active {
+  background: linear-gradient(180deg, #f43f5e 0%, #be185d 100%) !important;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), 0 0 18px rgba(244, 63, 94, 0.95) !important;
+}
 
 .key-note-label {
   font-size: 10px;
   font-family: var(--font-mono);
   font-weight: 700;
-  color: #475569;
+  color: #78716c;
 }
 
 .btn {
@@ -473,20 +541,30 @@ body {
 }
 
 .btn-primary {
-  background: var(--accent-primary);
-  color: #fff;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  background: var(--gold-button-gradient);
+  color: #0d0d12;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(212, 175, 55, 0.4);
+  border: 1px solid rgba(254, 240, 138, 0.5);
 }
 
-.btn-primary:hover { background: var(--accent-primary-hover); }
+.btn-primary:hover {
+  background: linear-gradient(135deg, #fef08a 0%, #d4af37 100%);
+  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.6);
+  transform: translateY(-1px);
+}
 
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(212, 175, 55, 0.08);
   color: var(--text-primary);
-  border: 1px solid var(--card-border);
+  border: 1px solid rgba(212, 175, 55, 0.3);
 }
 
-.btn-secondary:hover { background: rgba(255, 255, 255, 0.15); }
+.btn-secondary:hover {
+  background: rgba(212, 175, 55, 0.18);
+  border-color: rgba(212, 175, 55, 0.5);
+  color: #ffffff;
+}
 
 .hidden { display: none !important; }
 
@@ -569,7 +647,7 @@ body {
   text-align: center;
 }
 
-/* Octave Focus Switcher & Piano Scroll Box */
+/* Octave Focus Switcher & Piano Container */
 .piano-wrapper {
   display: flex;
   flex-direction: column;
@@ -579,41 +657,52 @@ body {
 .piano-octave-bar {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 4px;
+  gap: 12px;
+  margin-bottom: 6px;
 }
 
 .octave-label {
+  font-family: var(--font-display);
   font-size: 11px;
   font-weight: 700;
-  color: var(--text-secondary);
+  color: var(--text-gold);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
 }
 
 .octave-pills {
   display: flex;
   gap: 6px;
-  overflow-x: auto;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  padding: 3px;
+  border-radius: 20px;
 }
 
 .oct-pill {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--card-border);
-  border-radius: 12px;
+  background: transparent;
+  border: none;
+  border-radius: 16px;
   color: var(--text-secondary);
+  font-family: var(--font-body);
   font-size: 11px;
   font-weight: 600;
-  padding: 4px 10px;
+  padding: 5px 14px;
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.2s;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.oct-pill.active, .oct-pill:hover {
-  background: var(--accent-primary);
+.oct-pill.active {
+  background: var(--gold-button-gradient);
+  color: #0f0f14;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.4);
+}
+
+.oct-pill:hover:not(.active) {
   color: #fff;
-  border-color: var(--accent-primary);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .piano-scroll-box {
@@ -622,15 +711,17 @@ body {
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
   padding-bottom: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(212, 175, 55, 0.3) transparent;
 }
 
 .piano-scroll-box::-webkit-scrollbar {
-  height: 6px;
+  height: 4px;
 }
 
 .piano-scroll-box::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 3px;
+  background: rgba(212, 175, 55, 0.35);
+  border-radius: 4px;
 }
 
 /* Accessibility Focus Outlines */
