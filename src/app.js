@@ -43,6 +43,7 @@ export class AppController {
   init() {
     this.staff = new MusicStaff('music-staff');
     this.staff.draw();
+    requestAnimationFrame(() => this.staff.draw());
 
     // Clickable Staff Handler: Click on staff lines/spaces to play pitch and show solfege!
     this.staff.onStaffClick = (midi) => {
