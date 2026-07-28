@@ -39,6 +39,7 @@
       --font-mono: "Space Grotesk",monospace;
     }
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+    html{overflow-x:hidden}
     body {
       background-color:var(--bg-primary);
       background-image:
@@ -50,6 +51,7 @@
       font-family:var(--font-body);
       min-height:100vh;
       padding:16px;
+      overflow-x:hidden;
     }
     .app-container{width:100%;max-width:1140px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
 
@@ -161,12 +163,12 @@
     .piano-scroll::-webkit-scrollbar{height:5px}
     .piano-scroll::-webkit-scrollbar-thumb{background:rgba(212,175,55,.4);border-radius:4px}
     .piano-scroll::-webkit-scrollbar-track{background:rgba(0,0,0,.3);border-radius:4px}
-    .piano-keyboard{display:flex;position:relative;height:230px;min-width:820px;user-select:none;-webkit-user-select:none}
+    .piano-keyboard{display:flex;position:relative;height:260px;min-width:860px;user-select:none;-webkit-user-select:none}
     .piano-key{position:relative;cursor:pointer;transition:all .07s ease-out}
 
     /* ── WHITE KEYS ── */
     .white-key{
-      flex:1;height:100%;min-width:30px;max-width:44px;
+      flex:1;height:100%;min-width:32px;max-width:48px;
       background:linear-gradient(180deg,#f8f8f8 0%,#f0ece4 60%,#ddd5c4 100%);
       border:1px solid #b0a898;
       border-radius:0 0 8px 8px;
@@ -175,7 +177,7 @@
       display:flex;
       align-items:flex-end;
       justify-content:center;
-      padding-bottom:8px;
+      padding-bottom:9px;
     }
     .white-key:hover{
       background:linear-gradient(180deg,#fffef0,#fef9d0 60%,#fef0a0 100%);
@@ -189,16 +191,16 @@
 
     /* ── BLACK KEYS ── */
     .black-key{
-      width:28px;min-width:28px;height:62%;
+      width:36px;min-width:36px;height:62%;
       background:linear-gradient(180deg,#3a3a3a 0%,#1a1a1a 50%,#080808 100%);
       border:1px solid #555;
       border-bottom:2px solid #222;
       border-radius:0 0 6px 6px;
       box-shadow:inset 0 -3px 6px rgba(255,255,255,.15),inset 2px 0 4px rgba(0,0,0,.5),3px 6px 14px rgba(0,0,0,.85);
-      z-index:2;margin-left:-14px;margin-right:-14px;
+      z-index:2;margin-left:-18px;margin-right:-18px;
       position:relative;
       display:flex;align-items:flex-end;justify-content:center;
-      padding-bottom:7px;
+      padding-bottom:8px;
     }
     .black-key:hover{
       background:linear-gradient(180deg,#555,#2a2a2a 50%,#111 100%);
@@ -210,8 +212,7 @@
       transform:scaleY(.985);transform-origin:top center;
     }
 
-    /* ── KEY LABELS ── */
-    /* Single inline label: "C4", "D#3" etc. */
+    /* ── KEY LABELS (both white and black, horizontal) ── */
     .key-lbl{
       font-size:10px;font-family:var(--font-mono);font-weight:800;
       color:#6b6055;letter-spacing:0;
@@ -219,15 +220,14 @@
       white-space:nowrap;line-height:1;
       text-align:center;display:block;
     }
-    /* Black key label — horizontal, readable */
+    /* Black key label — SAME style as white, horizontal, just lighter colour */
     .key-lbl-black{
-      font-size:8px;font-family:var(--font-mono);font-weight:700;
-      color:rgba(255,255,255,.55);
+      font-size:9px;font-family:var(--font-mono);font-weight:700;
+      color:rgba(255,255,255,.65);
       pointer-events:none;user-select:none;
       white-space:nowrap;line-height:1;
-      writing-mode:vertical-rl;text-orientation:mixed;
-      transform:rotate(180deg);
-      letter-spacing:0.5px;
+      text-align:center;display:block;
+      /* NO writing-mode or rotation — reads left-to-right like white keys */
     }
     /* C note highlight */
     .key-c-lbl .key-lbl{color:#8a7055;font-weight:900}
@@ -305,42 +305,201 @@
     .modal-close{position:absolute;top:12px;right:12px;background:transparent;border:none;color:var(--text-muted);font-size:22px;cursor:pointer}
     .hidden{display:none!important}
 
-    /* === RESPONSIVE === */
-    /* === HAMBURGER MENU === */
-    .hamburger-btn{display:none;background:rgba(212,175,55,.1);border:1px solid rgba(212,175,55,.3);color:var(--accent-yellow);font-size:20px;padding:8px 12px;border-radius:10px;cursor:pointer;transition:all .2s}
+    /* =============================================
+       RESPONSIVE — Mobile-First Full Overhaul
+       320px  → phones (tiny)
+       480px  → phones (standard)
+       768px  → tablets
+       900px  → small laptops
+       1140px → desktop (default)
+    ============================================= */
+
+    /* ——— Hamburger button (hidden on desktop) ——— */
+    .hamburger-btn{
+      display:none;
+      align-items:center;gap:6px;
+      background:rgba(212,175,55,.1);border:1px solid rgba(212,175,55,.3);
+      color:var(--accent-yellow);font-size:18px;
+      padding:10px 14px;border-radius:10px;
+      cursor:pointer;transition:all .2s;
+      min-height:44px; /* touch target */
+    }
     .hamburger-btn:hover{background:rgba(212,175,55,.22)}
+
+    /* Sidebar overlay (mobile) */
     .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:49;backdrop-filter:blur(4px)}
     .sidebar-overlay.open{display:block}
 
+    /* Mobile top bar */
+    .mobile-topbar{display:none;align-items:center;justify-content:space-between;margin-bottom:12px;gap:10px}
+
+    /* Piano scroll hint — only on mobile */
+    .piano-hint{display:none;text-align:center;font-size:11px;color:var(--text-muted);margin-top:6px;letter-spacing:.3px}
+
+    /* ——— Tablet ≤ 900px ——— */
     @media(max-width:900px){
+      body{padding:10px}
+      .app-container{gap:12px}
+
+      /* Sidebar — slide-in drawer */
       .studio-layout{grid-template-columns:1fr}
-      .studio-sidebar{position:fixed;left:-100%;top:0;bottom:0;z-index:50;border-radius:0 18px 18px 0;overflow-y:auto;transition:left .3s cubic-bezier(.4,0,.2,1);min-width:260px;max-width:80vw;padding-top:60px}
+      .studio-sidebar{
+        position:fixed;left:-100%;top:0;bottom:0;z-index:50;
+        border-radius:0 18px 18px 0;
+        overflow-y:auto;
+        transition:left .3s cubic-bezier(.4,0,.2,1);
+        min-width:270px;max-width:82vw;
+        padding-top:56px;
+      }
       .studio-sidebar.mobile-open{left:0}
-      .hamburger-btn{display:flex;align-items:center;gap:6px}
+      .hamburger-btn{display:flex}
+      .mobile-topbar{display:flex}
       .sidebar-nav{display:flex;flex-direction:column;gap:5px}
       .nav-sub{display:block}
+
+      /* Header */
+      .app-header{flex-direction:column;align-items:flex-start;gap:10px;padding:14px}
+      .settings-bar{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:end}
+      .settings-bar a.btn{grid-column:1/-1;justify-content:center}
+      select{font-size:14px;padding:9px 10px}
+
+      /* Grid layouts */
       .dashboard-grid{grid-template-columns:1fr}
-      .settings-bar{flex-direction:column;align-items:stretch}
       .pitch-wheel{grid-template-columns:repeat(4,1fr)}
-      .mobile-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+      .satb-sliders{grid-template-columns:1fr}
+
+      /* Staff */
+      #music-staff{height:220px}
+
+      /* Piano hint visible */
+      .piano-hint{display:block}
+
+      /* Ensure buttons are touch-friendly */
+      .btn{min-height:44px;padding:10px 16px}
+      .nav-item{min-height:48px}
+      .pitch-btn{min-height:52px}
     }
-    @media(max-width:500px){
+
+    /* ——— Phone ≤ 640px ——— */
+    @media(max-width:640px){
+      body{padding:8px}
+      .app-container{gap:10px}
+
+      /* Header — compact */
+      .app-header{padding:10px 12px;gap:8px}
+      .header-logo{width:34px;height:34px}
       .brand h1{font-size:20px}
+      .brand p{font-size:10px;letter-spacing:1px}
+      .settings-bar{grid-template-columns:1fr;gap:6px}
+      .settings-bar a.btn{display:none} /* hide GitHub on tiny screens */
+
+      /* Cards */
+      .glass-card{padding:14px;border-radius:12px}
+      .stat-card h3{font-size:10px;margin-bottom:10px}
+
+      /* Maestro banner */
+      .maestro-banner{padding:10px 12px;gap:10px}
+      .maestro-avatar{width:38px;height:38px;font-size:18px}
+      .maestro-head h4{font-size:13px}
+      #maestro-tip{font-size:12px}
+
+      /* Staff */
+      #music-staff{height:190px}
+      .staff-container{padding:6px}
+
+      /* Tuner */
       .tuner-gauge{width:150px;height:75px}
       .tuner-needle{height:65px}
       .note-val{font-size:26px}
-      .chord-grid{grid-template-columns:repeat(2,1fr)}
+      .sol-val{font-size:15px}
+      .metric-row{gap:14px}
+
+      /* Piano note card */
+      .guide-text{font-size:11px}
+
+      /* Pitch wheel */
+      .pitch-wheel{grid-template-columns:repeat(3,1fr);gap:6px}
+      .pitch-btn{font-size:12px;padding:9px 2px}
+      .chord-grid{grid-template-columns:repeat(2,1fr);gap:6px}
+      .chord-btn{font-size:11px;padding:8px 4px}
+
+      /* Solfege */
+      .solfege-grid{grid-template-columns:repeat(2,1fr);gap:8px}
+      .sol-name{font-size:17px}
+      .hand-sign{font-size:22px}
+
+      /* Actions */
+      .action-row{gap:6px}
+      .btn{font-size:12px;padding:9px 12px;min-height:42px}
+
+      /* Warmup */
+      .routine-card{padding:10px 12px}
+
+      /* SATB sliders */
+      .slider-row span{min-width:48px;font-size:11px}
+
+      /* Sight singing */
+      .melody-display{gap:4px;padding:8px;min-height:36px}
+      .mel-note{font-size:11px;padding:3px 6px}
+
+      /* Pitch match */
+      .target-display{gap:14px}
+      .ring-wrap{width:80px;height:80px}
+      .ring-wrap svg{width:80px;height:80px}
+      .target-note-big{font-size:18px}
+      .target-sol{font-size:11px}
+      .match-status{font-size:20px}
+
+      /* Theory guide */
+      .theory-info{font-size:12px;padding:8px 10px}
+
+      /* Freeplay panel grid */
+      #panel-freeplay > div:first-of-type{grid-template-columns:1fr!important}
+
+      /* Audio bar */
+      .audio-bar{flex-direction:column;gap:10px;padding:10px 12px}
+      .vol-slider{width:100%}
+      .vol-wrap{width:100%}
+
+      /* Piano keyboard */
+      .keyboard-wrap{padding:12px 10px 10px}
+      .piano-keyboard{height:200px}
     }
-    .mobile-topbar{display:none}
+
+    /* ——— Tiny phone ≤ 380px ——— */
+    @media(max-width:380px){
+      body{padding:6px}
+      .brand h1{font-size:17px}
+      .logo-area{gap:8px}
+      .header-logo{width:28px;height:28px}
+      .note-val{font-size:22px}
+      .pitch-wheel{grid-template-columns:repeat(3,1fr)}
+      .solfege-grid{grid-template-columns:repeat(2,1fr)}
+      .ring-wrap{width:70px;height:70px}
+      .ring-wrap svg{width:70px;height:70px}
+      .target-note-big{font-size:16px}
+      .piano-keyboard{height:175px}
+    }
+
+    /* ——— Focus styles for keyboard/screen reader accessibility ——— */
+    :focus-visible{
+      outline:2px solid var(--accent-yellow);
+      outline-offset:2px;
+      border-radius:6px;
+    }
+    button:focus-visible,select:focus-visible,input:focus-visible{
+      outline:2px solid var(--accent-yellow);
+      outline-offset:2px;
+    }
   </style>
 </head>
 <body>
 <div class="app-container">
 
   <!-- HEADER -->
-  <header class="app-header glass-card">
+  <header class="app-header glass-card" role="banner">
     <div class="logo-area">
-      <svg xmlns="http://www.w3.org/2000/svg" class="header-logo" width="44" height="44" viewBox="0 0 512 512" fill="none">
+      <svg xmlns="http://www.w3.org/2000/svg" class="header-logo" width="44" height="44" viewBox="0 0 512 512" fill="none" aria-hidden="true" focusable="false">
         <circle cx="256" cy="256" r="220" fill="url(#lb)"/>
         <path d="M120 256 Q160 216 200 256 T 280 256 T 360 256 T 440 256" stroke="#fff" stroke-width="12" stroke-linecap="round" opacity=".8"/>
         <g transform="translate(196,120)">
@@ -360,10 +519,10 @@
         <p>Sing &amp; Read Music</p>
       </div>
     </div>
-    <div class="settings-bar">
+    <div class="settings-bar" role="group" aria-label="Global settings">
       <div class="setting-item">
         <label for="key-select">KEY SIGNATURE</label>
-        <select id="key-select">
+        <select id="key-select" aria-label="Choose key signature">
           <option value="C_maj">C Major / A Minor (0 ♯/♭)</option>
           <option value="G_maj">G Major / E Minor (1 ♯)</option>
           <option value="D_maj">D Major / B Minor (2 ♯)</option>
@@ -383,40 +542,40 @@
       </div>
       <div class="setting-item">
         <label for="mode-select">SOLFEGE MODE</label>
-        <select id="mode-select">
+        <select id="mode-select" aria-label="Choose solfege mode">
           <option value="major">Movable Do (Major)</option>
           <option value="minor-la">La-Based Minor (Choir)</option>
           <option value="minor-do">Do-Based Minor</option>
         </select>
       </div>
-      <a href="https://github.com/jc0271724-cyber/pitch-master" target="_blank" class="btn btn-secondary" style="text-decoration:none;margin-top:auto">⭐ GitHub</a>
+      <a href="https://github.com/jc0271724-cyber/pitch-master" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" style="text-decoration:none;margin-top:auto" aria-label="View source on GitHub">⭐ GitHub</a>
     </div>
   </header>
 
   <!-- STUDIO LAYOUT -->
-  <div class="studio-layout">
+  <div class="studio-layout" role="main">
 
     <!-- SIDEBAR -->
-    <aside class="studio-sidebar">
+    <aside class="studio-sidebar" role="navigation" aria-label="Section navigation">
       <div class="sidebar-group">
         <span class="sidebar-group-title">🎹 CONCERT PRACTICE</span>
         <nav class="sidebar-nav">
-          <button class="nav-item active" data-tab="freeplay">
-            <span class="nav-icon">🎼</span>
+          <button class="nav-item active" data-tab="freeplay" aria-label="Free Play and Staff">
+            <span class="nav-icon" aria-hidden="true">🎼</span>
             <div class="nav-text-group">
               <span class="nav-label">Free Play &amp; Staff</span>
               <span class="nav-sub">Interactive Sheet Music</span>
             </div>
           </button>
-          <button class="nav-item" data-tab="pitchpipe">
-            <span class="nav-icon">🔊</span>
+          <button class="nav-item" data-tab="pitchpipe" aria-label="Pitch Pipe Studio">
+            <span class="nav-icon" aria-hidden="true">🔊</span>
             <div class="nav-text-group">
               <span class="nav-label">Pitch Pipe Studio</span>
               <span class="nav-sub">Chromatic Notes &amp; Chords</span>
             </div>
           </button>
-          <button class="nav-item" data-tab="solfege">
-            <span class="nav-icon">🖐️</span>
+          <button class="nav-item" data-tab="solfege" aria-label="Solfege and Hand Signs">
+            <span class="nav-icon" aria-hidden="true">🖐️</span>
             <div class="nav-text-group">
               <span class="nav-label">Solfege &amp; Hand Signs</span>
               <span class="nav-sub">Curwen Syllables</span>
@@ -428,29 +587,29 @@
       <div class="sidebar-group">
         <span class="sidebar-group-title">🎓 CHOIR ACADEMY</span>
         <nav class="sidebar-nav">
-          <button class="nav-item" data-tab="warmup">
-            <span class="nav-icon">🧘</span>
+          <button class="nav-item" data-tab="warmup" aria-label="Vocal Warm-ups">
+            <span class="nav-icon" aria-hidden="true">🧘</span>
             <div class="nav-text-group">
               <span class="nav-label">Vocal Warm-ups</span>
               <span class="nav-sub">Daily Choir Routines</span>
             </div>
           </button>
-          <button class="nav-item" data-tab="satb">
-            <span class="nav-icon">🎶</span>
+          <button class="nav-item" data-tab="satb" aria-label="SATB Sectionals">
+            <span class="nav-icon" aria-hidden="true">🎶</span>
             <div class="nav-text-group">
               <span class="nav-label">SATB Sectionals</span>
               <span class="nav-sub">4-Part Choir Mixer</span>
             </div>
           </button>
-          <button class="nav-item" data-tab="academy">
-            <span class="nav-icon">🎓</span>
+          <button class="nav-item" data-tab="academy" aria-label="Sight-Singing Studio">
+            <span class="nav-icon" aria-hidden="true">🎓</span>
             <div class="nav-text-group">
               <span class="nav-label">Sight-Singing Studio</span>
               <span class="nav-sub">Rhythm &amp; Melody</span>
             </div>
           </button>
-          <button class="nav-item" data-tab="practice">
-            <span class="nav-icon">🎯</span>
+          <button class="nav-item" data-tab="practice" aria-label="Pitch Match Arena">
+            <span class="nav-icon" aria-hidden="true">🎯</span>
             <div class="nav-text-group">
               <span class="nav-label">Pitch Match Arena</span>
               <span class="nav-sub">Precision Vocal Training</span>
@@ -701,8 +860,8 @@
       </div><!-- end dashboard-grid -->
 
       <!-- AUDIO CONTROL BAR -->
-      <div class="audio-bar glass-card">
-        <button class="btn btn-primary" id="btn-mic">🎙️ Start Microphone</button>
+      <div class="audio-bar glass-card" role="region" aria-label="Audio controls">
+        <button class="btn btn-primary" id="btn-mic" aria-label="Toggle microphone on or off">🎙️ Start Microphone</button>
         <div class="vol-wrap">
           <span style="font-size:18px">🔊</span>
           <input type="range" id="vol-master" class="vol-slider" min="0" max="1" step="0.05" value="0.75">
@@ -710,10 +869,11 @@
       </div>
 
       <!-- PIANO KEYBOARD -->
-      <div class="keyboard-wrap">
+      <div class="keyboard-wrap" role="region" aria-label="Interactive piano keyboard">
         <div class="piano-scroll">
-          <div class="piano-keyboard" id="piano-keyboard"></div>
+          <div class="piano-keyboard" id="piano-keyboard" role="group" aria-label="Piano keys"></div>
         </div>
+        <p class="piano-hint">👆 Swipe left/right to see all keys &nbsp;·&nbsp; Tap any key to play</p>
       </div>
 
     </main>
@@ -1604,7 +1764,7 @@ function buildKeyboardHTML(startMidi, endMidi) {
     {type:'white',offset:6},  // B
   ];
   const WHITE_W = 100/29; // percent - 5 octaves = ~29 white keys (C2 to C6)
-  const BLACK_W = WHITE_W*0.60;
+  const BLACK_W = WHITE_W*0.75; // wider black keys so the label fits horizontally
   let html = '';
   const mids = [];
   for(let m=startMidi;m<=endMidi;m++) mids.push(m);
@@ -1640,11 +1800,11 @@ function buildKeyboardHTML(startMidi, endMidi) {
     // Single inline label: "C4" not "C" on top of "4"
     html+=`<div class="piano-key white-key${extraClass}" data-midi="${m}" style="position:absolute;left:${p.left.toFixed(3)}%;width:${(WHITE_W*0.97).toFixed(3)}%;height:100%"><span class="key-lbl">${noteLetter}${oct}</span></div>`;
   });
-  // Black keys on top (vertical label: "C#4")
+  // Black keys on top (horizontal label: "C#4" — same as white keys)
   mids.filter(m=>positions[m].type==='black').forEach(m=>{
     const s=m%12;
     const oct=Math.floor(m/12)-1;
-    const sharpNote=NOTES_SHARP[s];
+    const sharpNote=NOTES_SHARP[s]; // e.g. 'C♯'
     const p=positions[m];
     html+=`<div class="piano-key black-key" data-midi="${m}" style="position:absolute;left:${p.left.toFixed(3)}%;width:${(BLACK_W*0.98).toFixed(3)}%;height:62%;z-index:2"><span class="key-lbl-black">${sharpNote}${oct}</span></div>`;
   });
