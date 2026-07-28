@@ -555,6 +555,7 @@ select option:hover, select option:focus, select option:checked {
   height: 155px;
   width: 100%;
   user-select: none;
+  touch-action: none; /* JS fully controls touch interactions on keys */
 }
 
 .piano-key {
@@ -796,8 +797,10 @@ select option:hover, select option:focus, select option:checked {
 .piano-scroll-box {
   width: 100%;
   overflow-x: auto;
+  overflow-y: hidden;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
+  touch-action: pan-x; /* allow native horizontal scroll swipes */
   padding-bottom: 4px;
   scrollbar-width: thin;
   scrollbar-color: rgba(212, 175, 55, 0.3) transparent;
@@ -880,7 +883,7 @@ button:focus-visible, select:focus-visible, input:focus-visible {
   }
 
   .piano-keyboard {
-    min-width: 720px;
+    min-width: 900px; /* ensures all 49 keys are scrollable on mobile */
     height: 140px;
   }
 

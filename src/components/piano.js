@@ -183,9 +183,15 @@ export class PianoKeyboard {
       }
     });
 
-    // Touch events (TouchStart, TouchMove, TouchEnd, TouchCancel)
-    const handleTouch = (e) => {
-      e.preventDefault();
+    // Touch events — swipe-aware: horizontal swipes scroll the keyboard,
+    // taps/vertical drags play notes.
+    const SWIPE_THRESHOLD = 8; // px of horizontal movement before treating as scroll
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let isScrollSwipe = false;   // true when user is swiping horizontally to scroll
+    let touchPlayActive = false; // true when user has started playing a key
+
+    const playTouchKeys = (e) => {
       const currentActive = new Set();
       for (let i = 0; i < e.touches.length; i++) {
         const touch = e.touches[i];
@@ -197,7 +203,6 @@ export class PianoKeyboard {
           playKey(midi);
         }
       }
-
       // Stop any keys no longer touched
       Array.from(this.activeMidis).forEach(midi => {
         if (!currentActive.has(midi)) {
@@ -206,16 +211,64 @@ export class PianoKeyboard {
       });
     };
 
-    keyboardEl.addEventListener('touchstart', handleTouch, { passive: false });
-    keyboardEl.addEventListener('touchmove', handleTouch, { passive: false });
+    keyboardEl.addEventListener('touchstart', (e) => {
+      const t = e.touches[0];
+      touchStartX = t.clientX;
+      touchStartY = t.clientY;
+      isScrollSwipe = false;
+      touchPlayActive = false;
+
+      // Tentatively play the key on touch-down (instant response)
+      const el = document.elementFromPoint(t.clientX, t.clientY);
+      const key = el ? el.closest('.piano-key') : null;
+      if (key) {
+        touchPlayActive = true;
+        e.preventDefault(); // prevent default only when on a key
+        playTouchKeys(e);
+      }
+      // If not on a key, let event propagate naturally (don't prevent)
+    }, { passive: false });
+
+    keyboardEl.addEventListener('touchmove', (e) => {
+      const t = e.touches[0];
+      const dx = Math.abs(t.clientX - touchStartX);
+      const dy = Math.abs(t.clientY - touchStartY);
+
+      if (!isScrollSwipe && dx > SWIPE_THRESHOLD && dx > dy) {
+        // User is swiping horizontally — switch to scroll mode, stop all notes
+        isScrollSwipe = true;
+        touchPlayActive = false;
+        stopAllActiveKeys();
+      }
+
+      if (isScrollSwipe) {
+        // Let the browser handle horizontal scroll natively — do NOT preventDefault
+        return;
+      }
+
+      // Not a swipe — playing keys across the keyboard
+      e.preventDefault();
+      playTouchKeys(e);
+    }, { passive: false });
+
     keyboardEl.addEventListener('touchend', (e) => {
+      if (isScrollSwipe) {
+        // Ended a scroll swipe, nothing to do for notes
+        isScrollSwipe = false;
+        return;
+      }
       if (e.touches.length === 0) {
         stopAllActiveKeys();
       } else {
-        handleTouch(e);
+        playTouchKeys(e);
       }
     }, { passive: false });
-    keyboardEl.addEventListener('touchcancel', () => stopAllActiveKeys(), { passive: false });
+
+    keyboardEl.addEventListener('touchcancel', () => {
+      isScrollSwipe = false;
+      touchPlayActive = false;
+      stopAllActiveKeys();
+    }, { passive: false });
 
     // PC Keyboard events
     window.addEventListener('keydown', (e) => {
