@@ -89,14 +89,19 @@ export class AppController {
       });
     }
 
-    // Tabs
-    const tabBtns = document.querySelectorAll('.nav-item, .tab-button');
-    tabBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        tabBtns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        this.switchTab(btn.dataset.tab);
-      });
+    // Sidebar & Navigation Tab Event Delegation (Handles inner spans & icons)
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('.nav-item, .tab-button');
+      if (!btn) return;
+
+      const tabId = btn.dataset.tab;
+      if (!tabId) return;
+
+      const allNavBtns = document.querySelectorAll('.nav-item, .tab-button');
+      allNavBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      this.switchTab(tabId);
     });
 
     // Mic button
