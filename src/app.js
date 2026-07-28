@@ -90,7 +90,7 @@ export class AppController {
     }
 
     // Tabs
-    const tabBtns = document.querySelectorAll('.tab-button');
+    const tabBtns = document.querySelectorAll('.nav-item, .tab-button');
     tabBtns.forEach(btn => {
       btn.addEventListener('click', () => {
         tabBtns.forEach(b => b.classList.remove('active'));

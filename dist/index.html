@@ -14,8 +14,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700;800&family=Plus+Jakarta+Sans:wght@700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 
-  <script type="module" crossorigin src="/pitch-master/assets/index-m2o4cAaz.js"></script>
-  <link rel="stylesheet" crossorigin href="/pitch-master/assets/index-DpMQ_E8V.css">
+  <link rel="stylesheet" crossorigin href="/pitch-master/assets/index-CrofFCnb.css">
 </head>
 <body>
 
@@ -83,38 +82,97 @@
       </div>
     </header>
 
-    <!-- Maestro Live Vocal Coach Banner -->
-    <div class="maestro-coaching-banner glass-card" id="maestro-coaching-banner">
-      <div class="maestro-avatar-box">
-        <span class="maestro-avatar-emoji">👨‍🎤</span>
-        <div class="maestro-status-dot pulse"></div>
-      </div>
-      <div class="maestro-coaching-content">
-        <div class="maestro-header-line">
-          <h4>Maestro Choir Director</h4>
-          <button id="btn-toggle-speech" class="speech-toggle-btn active" title="Toggle Spoken Feedback">
-            🗣️ Speech Feedback: <span id="lbl-speech-status">ON</span>
-          </button>
+    <!-- Studio 2-Column Main Workspace Layout -->
+    <div class="studio-layout">
+
+      <!-- Left Navigation Sidebar -->
+      <aside class="studio-sidebar glass-card">
+        <div class="sidebar-group">
+          <span class="sidebar-group-title">🎹 CONCERT PRACTICE</span>
+          <nav class="sidebar-nav">
+            <button id="tab-freeplay" class="nav-item active" data-tab="freeplay">
+              <span class="nav-icon">🎼</span>
+              <div class="nav-text-group">
+                <span class="nav-label">Free Play & Staff</span>
+                <span class="nav-sub">Interactive Sheet Music</span>
+              </div>
+            </button>
+            <button id="tab-pitchpipe" class="nav-item" data-tab="pitchpipe">
+              <span class="nav-icon">🔊</span>
+              <div class="nav-text-group">
+                <span class="nav-label">Pitch Pipe Studio</span>
+                <span class="nav-sub">Chromatic Wheel & Chords</span>
+              </div>
+            </button>
+            <button id="tab-solfege" class="nav-item" data-tab="solfege">
+              <span class="nav-icon">🖐️</span>
+              <div class="nav-text-group">
+                <span class="nav-label">Solfege & Hand Signs</span>
+                <span class="nav-sub">Curwen Syllables & Pitch</span>
+              </div>
+            </button>
+          </nav>
         </div>
-        <p id="lbl-maestro-tip" class="maestro-tip-text">"Welcome singer! Choose a warm-up or pitch exercise, start your mic, and let's make music together!"</p>
-      </div>
-    </div>
 
-    <!-- Navigation Tabs -->
-    <div class="tabs" role="tablist" aria-label="PitchMaster Navigation Tabs">
-      <button id="tab-freeplay" class="tab-button active" role="tab" aria-selected="true" data-tab="freeplay">Free Play / Sight Reading</button>
-      <button id="tab-pitchpipe" class="tab-button" role="tab" aria-selected="false" data-tab="pitchpipe">🔊 Pitch Pipe Wheel</button>
-      <button id="tab-warmup" class="tab-button" role="tab" aria-selected="false" data-tab="warmup">🧘 Vocal Warm-ups</button>
-      <button id="tab-satb" class="tab-button" role="tab" aria-selected="false" data-tab="satb">🎶 SATB Sectionals</button>
-      <button id="tab-academy" class="tab-button" role="tab" aria-selected="false" data-tab="academy">🎓 Sight-Singing Academy</button>
-      <button id="tab-practice" class="tab-button" role="tab" aria-selected="false" data-tab="practice">🎯 Pitch Match Training</button>
-      <button id="tab-solfege" class="tab-button" role="tab" aria-selected="false" data-tab="solfege">🎼 Hand Signs & Solfege</button>
-    </div>
+        <div class="sidebar-group" style="margin-top: 16px;">
+          <span class="sidebar-group-title">🎓 CHOIR ACADEMY</span>
+          <nav class="sidebar-nav">
+            <button id="tab-warmup" class="nav-item" data-tab="warmup">
+              <span class="nav-icon">🧘</span>
+              <div class="nav-text-group">
+                <span class="nav-label">Vocal Warm-ups</span>
+                <span class="nav-sub">Daily Choir Routines</span>
+              </div>
+            </button>
+            <button id="tab-satb" class="nav-item" data-tab="satb">
+              <span class="nav-icon">🎶</span>
+              <div class="nav-text-group">
+                <span class="nav-label">SATB Sectionals</span>
+                <span class="nav-sub">4-Part Choir Mixer</span>
+              </div>
+            </button>
+            <button id="tab-academy" class="nav-item" data-tab="academy">
+              <span class="nav-icon">🎓</span>
+              <div class="nav-text-group">
+                <span class="nav-label">Sight-Singing Studio</span>
+                <span class="nav-sub">Rhythm & Pitch Melodies</span>
+              </div>
+            </button>
+            <button id="tab-practice" class="nav-item" data-tab="practice">
+              <span class="nav-icon">🎯</span>
+              <div class="nav-text-group">
+                <span class="nav-label">Pitch Match Arena</span>
+                <span class="nav-sub">Precision Vocal Training</span>
+              </div>
+            </button>
+          </nav>
+        </div>
+      </aside>
 
-    <!-- Main Sheet Music Board (Grand Staff) -->
-    <section class="staff-container glass-card" id="staff-section">
-      <svg id="music-staff" viewBox="0 0 800 260" preserveAspectRatio="xMidYMid meet"></svg>
-    </section>
+      <!-- Right Main Concert Stage -->
+      <main class="studio-stage">
+
+        <!-- Maestro Live Vocal Coach Banner -->
+        <div class="maestro-coaching-banner glass-card" id="maestro-coaching-banner">
+          <div class="maestro-avatar-box">
+            <span class="maestro-avatar-emoji">👨‍🎤</span>
+            <div class="maestro-status-dot pulse"></div>
+          </div>
+          <div class="maestro-coaching-content">
+            <div class="maestro-header-line">
+              <h4>Maestro Choir Director</h4>
+              <button id="btn-toggle-speech" class="speech-toggle-btn active" title="Toggle Spoken Feedback">
+                🗣️ Speech Feedback: <span id="lbl-speech-status">ON</span>
+              </button>
+            </div>
+            <p id="lbl-maestro-tip" class="maestro-tip-text">"Welcome singer! Choose a warm-up or pitch exercise, start your mic, and let's make music together!"</p>
+          </div>
+        </div>
+
+        <!-- Main Sheet Music Board (Grand Staff) -->
+        <section class="staff-container glass-card" id="staff-section">
+          <svg id="music-staff" viewBox="0 0 800 260" preserveAspectRatio="xMidYMid meet"></svg>
+        </section>
 
     <!-- Dynamic Dashboard Panels -->
     <section class="dashboard-grid">
@@ -365,7 +423,10 @@
       </div>
     </section>
 
-  </div>
+      </main> <!-- End studio-stage -->
+    </div> <!-- End studio-layout -->
+
+  </div> <!-- End app-container -->
 
   <!-- Performance Report Card Modal -->
   <div id="report-modal" class="modal-overlay hidden">
