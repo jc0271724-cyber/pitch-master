@@ -234,6 +234,55 @@
     /* Middle C gold */
     .key-middlec .key-lbl{color:#d4af37!important;font-weight:900!important;text-shadow:0 0 8px rgba(212,175,55,.6)}
 
+    /* === SOLFEGE PIANO KEY BADGES & TONIC DO HIGHLIGHTS === */
+    .key-label-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      pointer-events: none;
+      user-select: none;
+    }
+    .key-sol-badge {
+      font-size: 8.5px;
+      font-family: var(--font-mono);
+      font-weight: 800;
+      padding: 1px 4px;
+      border-radius: 4px;
+      line-height: 1.1;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .key-sol-badge.tonic-do {
+      background: linear-gradient(135deg, #fbbf24 0%, #d4af37 100%);
+      color: #0d0d12;
+      box-shadow: 0 0 8px rgba(251, 191, 36, 0.9);
+      font-weight: 900;
+      border: 1px solid #fef08a;
+    }
+    .key-sol-badge.scale-sol {
+      background: rgba(129, 140, 248, 0.25);
+      color: #a5b4fc;
+      border: 1px solid rgba(129, 140, 248, 0.4);
+    }
+    .black-key .key-sol-badge.scale-sol {
+      background: rgba(251, 191, 36, 0.25);
+      color: #fde047;
+      border: 1px solid rgba(251, 191, 36, 0.4);
+    }
+    .key-sol-badge.chromatic-sol {
+      color: rgba(255, 255, 255, 0.35);
+      font-size: 7.5px;
+    }
+    .white-key.key-do-tonic {
+      border-bottom: 3px solid #d4af37;
+      box-shadow: inset 0 -8px 12px rgba(212, 175, 55, 0.25), 2px 4px 8px rgba(0, 0, 0, 0.35);
+    }
+    .black-key.key-do-tonic-black {
+      border-bottom: 3px solid #fbbf24;
+      box-shadow: inset 0 -4px 8px rgba(251, 191, 36, 0.3), 3px 6px 14px rgba(0, 0, 0, 0.85);
+    }
+
     /* === PANELS === */
     .panel{display:none}
     .panel.active-panel{display:block}
@@ -851,6 +900,7 @@
           <h3>🎓 MAESTRO · THEORY GUIDE</h3>
           <div id="theory-info" class="theory-info"></div>
           <div class="action-row">
+            <button class="btn btn-primary" id="btn-demo-piano-solfege">🎹 Play &amp; Highlight Solfège Scale on Piano</button>
             <button class="btn btn-secondary" id="btn-sing-scale">🎼 Sing the Scale</button>
             <button class="btn btn-secondary" id="btn-sing-triad">🎶 Sing the Triad</button>
             <button class="btn btn-secondary" id="btn-sing-dominant">🎵 Dominant 7th</button>
@@ -886,21 +936,23 @@
 // MUSIC THEORY DATA
 // =====================================================================
 const KEY_DB = {
-  C_maj:  {name:'C Major / A Minor',  type:'sharp',count:0, root:0,  minorRoot:9,  rootName:'C'},
-  G_maj:  {name:'G Major / E Minor',  type:'sharp',count:1, root:7,  minorRoot:4,  rootName:'G'},
-  D_maj:  {name:'D Major / B Minor',  type:'sharp',count:2, root:2,  minorRoot:11, rootName:'D'},
-  A_maj:  {name:'A Major / F♯ Minor', type:'sharp',count:3, root:9,  minorRoot:6,  rootName:'A'},
-  E_maj:  {name:'E Major / C♯ Minor', type:'sharp',count:4, root:4,  minorRoot:1,  rootName:'E'},
-  B_maj:  {name:'B Major / G♯ Minor', type:'sharp',count:5, root:11, minorRoot:8,  rootName:'B'},
-  Fs_maj: {name:'F♯ Major / D♯ Minor',type:'sharp',count:6, root:6,  minorRoot:3,  rootName:'F♯'},
-  Cs_maj: {name:'C♯ Major / A♯ Minor',type:'sharp',count:7, root:1,  minorRoot:10, rootName:'C♯'},
-  F_maj:  {name:'F Major / D Minor',  type:'flat', count:1, root:5,  minorRoot:2,  rootName:'F'},
-  Bb_maj: {name:'B♭ Major / G Minor', type:'flat', count:2, root:10, minorRoot:7,  rootName:'B♭'},
-  Eb_maj: {name:'E♭ Major / C Minor', type:'flat', count:3, root:3,  minorRoot:0,  rootName:'E♭'},
-  Ab_maj: {name:'A♭ Major / F Minor', type:'flat', count:4, root:8,  minorRoot:5,  rootName:'A♭'},
-  Db_maj: {name:'D♭ Major / B♭ Minor',type:'flat', count:5, root:1,  minorRoot:10, rootName:'D♭'},
-  Gb_maj: {name:'G♭ Major / E♭ Minor',type:'flat', count:6, root:6,  minorRoot:3,  rootName:'G♭'},
-  Cb_maj: {name:'C♭ Major / A♭ Minor',type:'flat', count:7, root:11, minorRoot:8,  rootName:'C♭'},
+  C_maj:   {name:'C Major / A Minor',  type:'sharp',count:0, root:0,  minorRoot:9,  rootName:'C'},
+  G_maj:   {name:'G Major / E Minor',  type:'sharp',count:1, root:7,  minorRoot:4,  rootName:'G'},
+  D_maj:   {name:'D Major / B Minor',  type:'sharp',count:2, root:2,  minorRoot:11, rootName:'D'},
+  A_maj:   {name:'A Major / F♯ Minor', type:'sharp',count:3, root:9,  minorRoot:6,  rootName:'A'},
+  E_maj:   {name:'E Major / C♯ Minor', type:'sharp',count:4, root:4,  minorRoot:1,  rootName:'E'},
+  B_maj:   {name:'B Major / G♯ Minor', type:'sharp',count:5, root:11, minorRoot:8,  rootName:'B'},
+  Fs_maj:  {name:'F♯ Major / D♯ Minor',type:'sharp',count:6, root:6,  minorRoot:3,  rootName:'F♯'},
+  'F#_maj':{name:'F♯ Major / D♯ Minor',type:'sharp',count:6, root:6,  minorRoot:3,  rootName:'F♯'},
+  Cs_maj:  {name:'C♯ Major / A♯ Minor',type:'sharp',count:7, root:1,  minorRoot:10, rootName:'C♯'},
+  'C#_maj':{name:'C♯ Major / A♯ Minor',type:'sharp',count:7, root:1,  minorRoot:10, rootName:'C♯'},
+  F_maj:   {name:'F Major / D Minor',  type:'flat', count:1, root:5,  minorRoot:2,  rootName:'F'},
+  Bb_maj:  {name:'B♭ Major / G Minor', type:'flat', count:2, root:10, minorRoot:7,  rootName:'B♭'},
+  Eb_maj:  {name:'E♭ Major / C Minor', type:'flat', count:3, root:3,  minorRoot:0,  rootName:'E♭'},
+  Ab_maj:  {name:'A♭ Major / F Minor', type:'flat', count:4, root:8,  minorRoot:5,  rootName:'A♭'},
+  Db_maj:  {name:'D♭ Major / B♭ Minor',type:'flat', count:5, root:1,  minorRoot:10, rootName:'D♭'},
+  Gb_maj:  {name:'G♭ Major / E♭ Minor',type:'flat', count:6, root:6,  minorRoot:3,  rootName:'G♭'},
+  Cb_maj:  {name:'C♭ Major / A♭ Minor',type:'flat', count:7, root:11, minorRoot:8,  rootName:'C♭'},
 };
 
 const MOVABLE_DO = ['Do','Di','Re','Ri','Mi','Fa','Fi','Sol','Si','La','Li','Ti'];
@@ -1263,18 +1315,29 @@ function getNoteName(midi) {
 
 function getKeyTheoryText(keyId) {
   const k = KEY_DB[keyId] || KEY_DB.C_maj;
-  if (k.count===0) {
-    return `<strong>C Major (No accidentals):</strong> C=<em>Do</em>, D=<em>Re</em>, E=<em>Mi</em>, F=<em>Fa</em>, G=<em>Sol</em>, A=<em>La</em>, B=<em>Ti</em>. The natural scale — no sharps or flats.`;
-  }
-  if (k.type==='sharp') {
+  const diatonicSemitones = [0, 2, 4, 5, 7, 9, 11];
+  const solfegeNames = ['Do', 'Re', 'Mi', 'Fa', 'Sol', 'La', 'Ti'];
+  const scaleSpelling = diatonicSemitones.map((off, i) => {
+    const semi = (k.root + off) % 12;
+    const noteName = k.type === 'flat' ? NOTES_FLAT[semi] : NOTES_SHARP[semi];
+    return `<strong>${noteName}</strong>=<em>${solfegeNames[i]}</em>`;
+  }).join(', ');
+
+  let ruleText = '';
+  if (k.count === 0) {
+    ruleText = `<strong>C Major (0 ♯/♭):</strong> C is <em>Do</em>. The natural scale with no sharps or flats.`;
+  } else if (k.type === 'sharp') {
     const lastSharps = ['F♯','C♯','G♯','D♯','A♯','E♯','B♯'];
-    const last = lastSharps[k.count-1];
-    return `<strong>Sharp Rule (${k.count} ♯):</strong> The LAST SHARP (<strong>${last}</strong>) is always <em>Ti</em> (7th scale degree). Go up one half-step from ${last} to find <em>Do</em> = <strong>${k.rootName}</strong>. Key of ${k.name}.`;
+    const last = lastSharps[k.count - 1];
+    ruleText = `<strong>Sharp Rule (${k.count} ♯):</strong> The LAST SHARP (<strong>${last}</strong>) is always <em>Ti</em> (7th degree). Go up 1 half-step from ${last} to find <em>Do</em> = <strong>${k.rootName}</strong>. Key of ${k.name}.`;
+  } else {
+    const lastFlats = ['B♭','E♭','A♭','D♭','G♭','C♭','F♭'];
+    const last = lastFlats[k.count - 1];
+    const secondToLast = k.count > 1 ? lastFlats[k.count - 2] : 'F (for 1-flat key)';
+    ruleText = `<strong>Flat Rule (${k.count} ♭):</strong> The LAST FLAT (<strong>${last}</strong>) is always <em>Fa</em> (4th degree). The 2nd-to-last flat (<strong>${secondToLast}</strong>) is <em>Do</em> = <strong>${k.rootName}</strong>. Key of ${k.name}.`;
   }
-  const lastFlats = ['B♭','E♭','A♭','D♭','G♭','C♭','F♭'];
-  const last = lastFlats[k.count-1];
-  const secondToLast = k.count>1 ? lastFlats[k.count-2] : '(F for 1-flat key)';
-  return `<strong>Flat Rule (${k.count} ♭):</strong> The LAST FLAT (<strong>${last}</strong>) is always <em>Fa</em> (4th scale degree). The 2nd-to-last flat (<strong>${secondToLast}</strong>) is <em>Do</em> = <strong>${k.rootName}</strong>. Key of ${k.name}.`;
+
+  return `${ruleText}<br><span style="margin-top:6px;display:block;color:var(--accent-yellow)">🎹 <strong>Scale Mapping in ${k.name}:</strong> ${scaleSpelling}</span>`;
 }
 
 // =====================================================================
@@ -1748,7 +1811,10 @@ function buildPianoKeyboard() {
 }
 
 function buildKeyboardHTML(startMidi, endMidi) {
-  // Build a standard piano keyboard layout
+  const k = KEY_DB[currentKey] || KEY_DB.C_maj;
+  const root = currentMode.startsWith('minor') ? k.minorRoot : k.root;
+  const diatonicOffsets = [0, 2, 4, 5, 7, 9, 11];
+
   const noteInOct = [
     {type:'white',offset:0},  // C
     {type:'black',offset:0},  // C#
@@ -1764,11 +1830,11 @@ function buildKeyboardHTML(startMidi, endMidi) {
     {type:'white',offset:6},  // B
   ];
   const WHITE_W = 100/29; // percent - 5 octaves = ~29 white keys (C2 to C6)
-  const BLACK_W = WHITE_W*0.75; // wider black keys so the label fits horizontally
+  const BLACK_W = WHITE_W*0.75;
   let html = '';
   const mids = [];
   for(let m=startMidi;m<=endMidi;m++) mids.push(m);
-  // Count whites for positioning
+
   let whiteIdx = 0;
   const positions = {};
   mids.forEach(m=>{
@@ -1777,37 +1843,58 @@ function buildKeyboardHTML(startMidi, endMidi) {
     if(info.type==='white'){positions[m]={left:whiteIdx*WHITE_W,type:'white',idx:whiteIdx};whiteIdx++;}
     else{positions[m]={type:'black'};}
   });
-  // Now assign black key positions
+
   let prevWhiteLeft=0;
   mids.forEach(m=>{
     const s=m%12;
     const info=noteInOct[s];
     if(info.type==='white') prevWhiteLeft=positions[m].left;
     else {
-      // Black key sits between previous and next white key
       positions[m].left=prevWhiteLeft+WHITE_W-(BLACK_W/2);
     }
   });
-  // White keys first (rendered behind)
+
+  // White keys
   mids.filter(m=>positions[m].type==='white').forEach(m=>{
-    const s=m%12;
-    const oct=Math.floor(m/12)-1;
-    const noteLetter=NOTES_SHARP[s]; // e.g. 'C', 'D', 'E'
-    const isMidC=m===60;
-    const isC=s===0;
-    const p=positions[m];
-    const extraClass=isMidC?' key-middlec':(isC?' key-c-lbl':'');
-    // Single inline label: "C4" not "C" on top of "4"
-    html+=`<div class="piano-key white-key${extraClass}" data-midi="${m}" style="position:absolute;left:${p.left.toFixed(3)}%;width:${(WHITE_W*0.97).toFixed(3)}%;height:100%"><span class="key-lbl">${noteLetter}${oct}</span></div>`;
+    const name = getNoteName(m);
+    const sol = getSolfege(m);
+    const semiFromRoot = ((m % 12) - root + 12) % 12;
+    const isTonic = semiFromRoot === 0;
+    const isDiatonic = diatonicOffsets.includes(semiFromRoot);
+    const isMidC = m === 60;
+    const isC = (m % 12) === 0;
+
+    let badgeClass = isTonic ? 'tonic-do' : (isDiatonic ? 'scale-sol' : 'chromatic-sol');
+    let extraClass = isMidC ? ' key-middlec' : (isC ? ' key-c-lbl' : '');
+    if (isTonic) extraClass += ' key-do-tonic';
+
+    html += `<div class="piano-key white-key${extraClass}" data-midi="${m}" style="position:absolute;left:${positions[m].left.toFixed(3)}%;width:${(WHITE_W*0.97).toFixed(3)}%;height:100%">
+      <div class="key-label-box">
+        <span class="key-lbl">${name}</span>
+        <span class="key-sol-badge ${badgeClass}">${sol}</span>
+      </div>
+    </div>`;
   });
-  // Black keys on top (horizontal label: "C#4" — same as white keys)
+
+  // Black keys
   mids.filter(m=>positions[m].type==='black').forEach(m=>{
-    const s=m%12;
-    const oct=Math.floor(m/12)-1;
-    const sharpNote=NOTES_SHARP[s]; // e.g. 'C♯'
-    const p=positions[m];
-    html+=`<div class="piano-key black-key" data-midi="${m}" style="position:absolute;left:${p.left.toFixed(3)}%;width:${(BLACK_W*0.98).toFixed(3)}%;height:62%;z-index:2"><span class="key-lbl-black">${sharpNote}${oct}</span></div>`;
+    const name = getNoteName(m);
+    const sol = getSolfege(m);
+    const semiFromRoot = ((m % 12) - root + 12) % 12;
+    const isTonic = semiFromRoot === 0;
+    const isDiatonic = diatonicOffsets.includes(semiFromRoot);
+
+    let badgeClass = isTonic ? 'tonic-do' : (isDiatonic ? 'scale-sol' : 'chromatic-sol');
+    let extraClass = isTonic ? ' key-do-tonic-black' : '';
+
+    html += `<div class="piano-key black-key${extraClass}" data-midi="${m}" style="position:absolute;left:${positions[m].left.toFixed(3)}%;width:${(BLACK_W*0.98).toFixed(3)}%;height:62%;z-index:2">
+      <div class="key-label-box">
+        <span class="key-lbl-black">${name}</span>
+        <span class="key-sol-badge ${badgeClass}">${sol}</span>
+      </div>
+    </div>`;
   });
+
   return html;
 }
 
@@ -1925,9 +2012,10 @@ function updateKeySignature() {
   STAFF.draw();
   const info = document.getElementById('theory-info');
   if(info) info.innerHTML=getKeyTheoryText(currentKey);
-  // Rebuild relevant panels if visible
+  // Rebuild relevant panels & piano keyboard labels
   if(currentTab==='pitchpipe') buildPitchWheel();
   if(currentTab==='solfege') buildSolfegeGrid();
+  buildPianoKeyboard();
 }
 
 // =====================================================================
@@ -2070,7 +2158,29 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('btn-new-target')?.addEventListener('click',()=>{newTarget();maestroSay(`New target note. Listen and match it with your voice.`);});
   document.getElementById('btn-hear-target')?.addEventListener('click',()=>{playNote(targetMidi);setTimeout(()=>stopNote(targetMidi),1200);});
 
+function demoScaleSolfegeOnPiano() {
+  const k = KEY_DB[currentKey] || KEY_DB.C_maj;
+  const root = 60 + (k.root % 12);
+  const scaleOffsets = [0, 2, 4, 5, 7, 9, 11, 12];
+  const solfegeNames = ['Do', 'Re', 'Mi', 'Fa', 'Sol', 'La', 'Ti', 'Do'];
+
+  maestroSay(`Playing and highlighting the ${k.rootName} major scale with Solfège on the piano keyboard.`);
+
+  scaleOffsets.forEach((off, i) => {
+    const midi = root + off;
+    setTimeout(() => {
+      playPianoKeyByMidi(midi);
+      singSyllable(midi, solfegeNames[i], 500);
+      setTimeout(() => {
+        const key = document.querySelector(`.piano-key[data-midi="${midi}"]`);
+        stopPianoKey(midi, key);
+      }, 500);
+    }, i * 600);
+  });
+}
+
   // Theory guide buttons
+  document.getElementById('btn-demo-piano-solfege')?.addEventListener('click', demoScaleSolfegeOnPiano);
   document.getElementById('btn-sing-scale')?.addEventListener('click',()=>{
     const k=KEY_DB[currentKey]||KEY_DB.C_maj;
     const root=60+k.root;
