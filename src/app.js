@@ -143,8 +143,9 @@ class AppController {
     // Bind UI elements
     this.bindEvents();
     
-    // Update key selections
+    // Update key selections & piano key badges
     this.updateKeySignature();
+    this.updatePianoKeyLabels();
   }
 
   initDropdowns() {
@@ -329,6 +330,8 @@ class AppController {
     // Maestro demonstration buttons
     document.getElementById('btn-sing-scale').addEventListener('click', () => this.singScale());
     document.getElementById('btn-sing-triad').addEventListener('click', () => this.singTriad());
+    const demoPianoBtn = document.getElementById('btn-demo-piano-scale');
+    if (demoPianoBtn) demoPianoBtn.addEventListener('click', () => this.demonstrateScaleOnPiano());
 
     // Melody mode buttons
     document.getElementById('btn-play-melody').addEventListener('click', () => this.playMelody());
@@ -716,6 +719,7 @@ class AppController {
     const keyData = KEY_DATABASE[this.currentKeyId];
     this.staff.setKey(keyData.type, keyData.count);
     this.updateMaestroCard();
+    this.updatePianoKeyLabels();
     
     // Regenerate exercises so they stay diatonic in the new key signature
     if (this.mode === 'practice') {
@@ -1610,6 +1614,69 @@ class AppController {
     }
     if (scoreEl) scoreEl.textContent = this.rhythmScore;
     if (streakEl) streakEl.textContent = this.rhythmStreak;
+  }
+
+  // Dynamic Movable Do Badges & Home-Base Highlight on Piano Keyboard
+  updatePianoKeyLabels() {
+    const diatonicSyllables = {
+      'Do': 'do',
+      'Re': 're',
+      'Mi': 'mi',
+      'Fa': 'fa',
+      'Sol': 'sol',
+      'La': 'la',
+      'Ti': 'ti'
+    };
+
+    const keys = document.querySelectorAll('.piano-key');
+    keys.forEach(keyEl => {
+      const midi = parseInt(keyEl.getAttribute('data-midi'));
+      if (isNaN(midi)) return;
+
+      const solfege = this.calculateSolfege(midi);
+      
+      const oldBadge = keyEl.querySelector('.solfege-key-badge');
+      if (oldBadge) oldBadge.remove();
+      keyEl.classList.remove('tonic-do');
+
+      if (solfege && diatonicSyllables[solfege]) {
+        const badge = document.createElement('span');
+        badge.className = `solfege-key-badge solfege-${diatonicSyllables[solfege]}`;
+        badge.textContent = solfege;
+        keyEl.appendChild(badge);
+
+        if (solfege === 'Do') {
+          keyEl.classList.add('tonic-do');
+        }
+      }
+    });
+  }
+
+  // Demonstrate diatonic scale fingerings on piano keyboard key-by-key
+  demonstrateScaleOnPiano() {
+    if (this.botSinging || this.melodyPlaybackActive) return;
+    const midis = this.maestroScaleMidis();
+    if (!midis || midis.length < 8) return;
+    
+    this.botSinging = true;
+    const keyName = KEY_DATABASE[this.currentKeyId].name;
+    this.teacher.speak(`Demonstrating scale fingerings on piano for ${keyName}`, true);
+
+    const stepMs = 600;
+    midis.forEach((midi, i) => {
+      setTimeout(() => {
+        this.triggerPianoNoteStart(midi);
+        window.synth.singSyllable(midi, this.calculateSolfege(midi), 500);
+
+        setTimeout(() => {
+          this.triggerPianoNoteStop(midi);
+        }, 520);
+      }, i * stepMs);
+    });
+
+    setTimeout(() => {
+      this.botSinging = false;
+    }, midis.length * stepMs + 300);
   }
 }
 

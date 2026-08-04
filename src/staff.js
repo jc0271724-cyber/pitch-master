@@ -609,20 +609,35 @@ class MusicStaff {
     // Label Note Name & Solfege below the staff (skipped for non-current melody
     // notes — reading them without help is the sight-singing exercise)
     if (role !== 'melody') {
+      const textG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      
+      const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      rect.setAttribute('x', x - 48);
+      rect.setAttribute('y', 231);
+      rect.setAttribute('width', 96);
+      rect.setAttribute('height', 24);
+      rect.setAttribute('rx', 6);
+      rect.setAttribute('ry', 6);
+      rect.setAttribute('fill', 'rgba(12, 12, 18, 0.92)');
+      rect.setAttribute('stroke', color);
+      rect.setAttribute('stroke-width', '1.5');
+      textG.appendChild(rect);
+
       const textLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
       textLabel.setAttribute('x', x);
-      textLabel.setAttribute('y', '245'); // Bottom label line
+      textLabel.setAttribute('y', '247'); // Bottom label line
       textLabel.setAttribute('fill', color);
       textLabel.setAttribute('font-family', '"Plus Jakarta Sans", "Inter", sans-serif');
-      textLabel.setAttribute('font-weight', '700');
-      textLabel.setAttribute('font-size', '14px');
+      textLabel.setAttribute('font-weight', '800');
+      textLabel.setAttribute('font-size', '13px');
       textLabel.setAttribute('text-anchor', 'middle');
 
       // Set text display (e.g. "C4 (Do)")
       const solfege = noteObj.solfege || '';
       const noteName = noteObj.spelling.displayName + noteObj.spelling.octave;
       textLabel.textContent = solfege ? `${noteName} (${solfege})` : noteName;
-      noteG.appendChild(textLabel);
+      textG.appendChild(textLabel);
+      noteG.appendChild(textG);
     }
 
     group.appendChild(noteG);

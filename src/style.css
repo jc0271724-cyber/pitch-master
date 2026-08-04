@@ -913,6 +913,56 @@ body {
   transform: translateY(1px);
 }
 
+/* Solfege Badges & Key Highlights */
+.solfege-key-badge {
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 5px;
+  border-radius: 6px;
+  text-transform: capitalize;
+  line-height: 1;
+  pointer-events: none;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  z-index: 6;
+  white-space: nowrap;
+}
+
+.black-key .solfege-key-badge {
+  top: 4px;
+  font-size: 9px;
+  padding: 1px 4px;
+}
+
+.solfege-do { background: #10b981; color: #ffffff; }
+.solfege-re { background: #06b6d4; color: #ffffff; }
+.solfege-mi { background: #f59e0b; color: #000000; }
+.solfege-fa { background: #f97316; color: #ffffff; }
+.solfege-sol { background: #3b82f6; color: #ffffff; }
+.solfege-la { background: #a855f7; color: #ffffff; }
+.solfege-ti { background: #ec4899; color: #ffffff; }
+
+/* Home Base "Do" Tonic Key Highlight */
+.piano-key.tonic-do {
+  box-shadow: 0 0 12px #10b981, inset 0 0 8px rgba(16, 185, 129, 0.4);
+  border-color: #10b981 !important;
+}
+
+.piano-key.tonic-do::after {
+  content: "★";
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  color: #10b981;
+  pointer-events: none;
+}
+
 /* Maestro Live Vocal Coach Banner */
 .maestro-coaching-banner {
   display: flex;
