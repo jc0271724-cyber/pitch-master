@@ -1,39 +1,141 @@
-// Unified Web Audio Synthesizer Engine for PitchMaster
-
-export class MusicSynth {
+class MusicSynth {
   constructor() {
     this.audioCtx = null;
     this.masterGain = null;
     this.delayNode = null;
     this.delayGain = null;
-    this.activeNotes = new Map();
-    this.volume = 0.75;
-    this.tuningStandard = 440;
-    this.soundProfile = 'choir'; // 'choir', 'organ', 'sine', 'flute'
+    this.activeNotes = new Map(); // Maps MIDI note number to synthesis nodes
+    this.activeOrganPipes = new Map(); // Maps MIDI note number to organ pipe nodes
+    this.organStop = 'principal'; // 'principal', 'flute', 'full', 'drone'
+    this.volume = 0.75; // Remember slider volume even before first note initializes audio
     this.satbVolumes = { soprano: 1.0, alto: 1.0, tenor: 1.0, bass: 1.0 };
-    this.isUnlocked = false;
-
-    this.setupGlobalUnlock();
   }
 
-  setupGlobalUnlock() {
-    const unlock = () => {
-      this.init();
-      if (this.audioCtx && this.audioCtx.state === 'suspended') {
-        this.audioCtx.resume();
-      }
-      this.isUnlocked = true;
-    };
-    window.addEventListener('click', unlock, { once: true });
-    window.addEventListener('touchstart', unlock, { once: true });
+  setOrganStop(stopName) {
+    this.organStop = stopName || 'principal';
   }
 
-  setTuning(freq) {
-    this.tuningStandard = parseFloat(freq) || 440;
+  playOrganPipe(midiNote) {
+    this.init();
+    if (this.audioCtx.state === 'suspended') {
+      this.audioCtx.resume();
+    }
+
+    if (this.activeOrganPipes.has(midiNote)) {
+      this.stopOrganPipe(midiNote);
+    }
+
+    const now = this.audioCtx.currentTime;
+    const freq = this.midiToFreq(midiNote);
+    const ctx = this.audioCtx;
+
+    // Pipe Organ multi-rank stops harmonics
+    let ranks = [];
+    if (this.organStop === 'flute') {
+      ranks = [
+        { mult: 1.0, type: 'sine', gain: 0.6 },
+        { mult: 2.0, type: 'sine', gain: 0.35 },
+        { mult: 4.0, type: 'sine', gain: 0.15 }
+      ];
+    } else if (this.organStop === 'full') {
+      ranks = [
+        { mult: 0.5, type: 'sawtooth', gain: 0.25 }, // Sub-bass 16'
+        { mult: 1.0, type: 'sawtooth', gain: 0.5 },  // Principal 8'
+        { mult: 2.0, type: 'triangle', gain: 0.4 },  // Octave 4'
+        { mult: 3.0, type: 'sine', gain: 0.2 },      // Twelfth 2 2/3'
+        { mult: 4.0, type: 'sine', gain: 0.25 }      // Superoctave 2'
+      ];
+    } else if (this.organStop === 'drone') {
+      ranks = [
+        { mult: 0.5, type: 'sine', gain: 0.5 },
+        { mult: 1.0, type: 'triangle', gain: 0.5 },
+        { mult: 1.5, type: 'sine', gain: 0.25 }
+      ];
+    } else {
+      // Principal (default)
+      ranks = [
+        { mult: 1.0, type: 'triangle', gain: 0.55 },
+        { mult: 2.0, type: 'sine', gain: 0.3 },
+        { mult: 3.0, type: 'sine', gain: 0.15 },
+        { mult: 4.0, type: 'triangle', gain: 0.1 }
+      ];
+    }
+
+    const oscs = [];
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(this.organStop === 'full' ? 4500 : 2600, now);
+
+    const pipeGain = ctx.createGain();
+    pipeGain.gain.setValueAtTime(0, now);
+    pipeGain.gain.linearRampToValueAtTime(0.45, now + 0.08); // organ swell attack
+
+    ranks.forEach(r => {
+      const osc = ctx.createOscillator();
+      osc.type = r.type;
+      osc.frequency.setValueAtTime(freq * r.mult, now);
+      const rGain = ctx.createGain();
+      rGain.gain.setValueAtTime(r.gain, now);
+      osc.connect(rGain);
+      rGain.connect(filter);
+      oscs.push(osc);
+      osc.start(now);
+    });
+
+    filter.connect(pipeGain);
+    pipeGain.connect(this.masterGain);
+    pipeGain.connect(this.delayNode);
+
+    this.activeOrganPipes.set(midiNote, {
+      oscillators: oscs,
+      gain: pipeGain,
+      filter: filter
+    });
   }
 
-  setSoundProfile(profile) {
-    this.soundProfile = profile;
+  stopOrganPipe(midiNote) {
+    if (!this.activeOrganPipes.has(midiNote)) return;
+
+    const now = this.audioCtx.currentTime;
+    const pipeObj = this.activeOrganPipes.get(midiNote);
+    this.activeOrganPipes.delete(midiNote);
+
+    const gainNode = pipeObj.gain;
+    gainNode.gain.cancelScheduledValues(now);
+    gainNode.gain.setValueAtTime(gainNode.gain.value || 0.45, now);
+    gainNode.gain.linearRampToValueAtTime(0.0001, now + 0.35); // smooth organ wind release
+
+    setTimeout(() => {
+      pipeObj.oscillators.forEach(osc => {
+        try {
+          osc.stop();
+          osc.disconnect();
+        } catch(e) {}
+      });
+      try {
+        gainNode.disconnect();
+        pipeObj.filter.disconnect();
+      } catch(e) {}
+    }, 450);
+  }
+
+  stopAllOrganPipes() {
+    Array.from(this.activeOrganPipes.keys()).forEach(n => this.stopOrganPipe(n));
+  }
+
+  playWoodblock() {
+    this.init();
+    const now = this.audioCtx.currentTime;
+    const osc = this.audioCtx.createOscillator();
+    const gain = this.audioCtx.createGain();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(1200, now);
+    gain.gain.setValueAtTime(0.2, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+    osc.connect(gain);
+    gain.connect(this.masterGain);
+    osc.start(now);
+    osc.stop(now + 0.05);
   }
 
   setSATBVolume(part, vol) {
@@ -42,40 +144,10 @@ export class MusicSynth {
     }
   }
 
-  init() {
-    if (this.audioCtx) return;
-
-    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-    this.audioCtx = window.getSharedAudioContext ? window.getSharedAudioContext() : new AudioContextClass();
-
-    this.masterGain = this.audioCtx.createGain();
-    this.masterGain.gain.setValueAtTime(this.volume * 0.4, this.audioCtx.currentTime);
-
-    this.delayNode = this.audioCtx.createDelay(1.0);
-    this.delayNode.delayTime.setValueAtTime(0.22, this.audioCtx.currentTime);
-
-    this.delayGain = this.audioCtx.createGain();
-    this.delayGain.gain.setValueAtTime(0.12, this.audioCtx.currentTime);
-
-    const delayFeedback = this.audioCtx.createGain();
-    delayFeedback.gain.setValueAtTime(0.20, this.audioCtx.currentTime);
-
-    this.delayNode.connect(delayFeedback);
-    delayFeedback.connect(this.delayNode);
-    this.delayNode.connect(this.delayGain);
-    this.delayGain.connect(this.masterGain);
-
-    this.masterGain.connect(this.audioCtx.destination);
-  }
-
-  midiToFreq(note) {
-    return this.tuningStandard * Math.pow(2, (note - 69) / 12);
-  }
-
   playSATBNote(part, midiNote, durMs) {
     this.init();
     if (!midiNote || this.satbVolumes[part] <= 0) return;
-
+    
     if (this.audioCtx.state === 'suspended') {
       this.audioCtx.resume();
     }
@@ -83,7 +155,8 @@ export class MusicSynth {
     const now = ctx.currentTime;
     const dur = Math.max(0.2, durMs / 1000);
     const freq = this.midiToFreq(midiNote);
-
+    
+    // Stereo panning based on SATB choir layout: Soprano (Left), Alto (Mid-Left), Tenor (Mid-Right), Bass (Right)
     const panMap = { soprano: -0.4, alto: -0.15, tenor: 0.15, bass: 0.4 };
     const panner = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
     if (panner) panner.pan.setValueAtTime(panMap[part] || 0, now);
@@ -92,13 +165,13 @@ export class MusicSynth {
     const osc2 = ctx.createOscillator();
     osc1.type = part === 'bass' ? 'sawtooth' : (part === 'soprano' ? 'sine' : 'triangle');
     osc2.type = 'sine';
-
+    
     osc1.frequency.setValueAtTime(freq, now);
     osc2.frequency.setValueAtTime(freq * 2, now);
 
     const gainNode = ctx.createGain();
     const partVol = this.satbVolumes[part] || 1.0;
-
+    
     gainNode.gain.setValueAtTime(0, now);
     gainNode.gain.linearRampToValueAtTime(0.35 * partVol, now + 0.05);
     gainNode.gain.exponentialRampToValueAtTime(0.0001, now + dur);
@@ -110,7 +183,7 @@ export class MusicSynth {
     osc1.connect(filter);
     osc2.connect(filter);
     filter.connect(gainNode);
-
+    
     if (panner) {
       gainNode.connect(panner);
       panner.connect(this.masterGain);
@@ -135,93 +208,121 @@ export class MusicSynth {
     });
   }
 
+
+  init() {
+    if (this.audioCtx) return;
+
+    // Initialize shared AudioContext to prevent conflicts with microphone
+    this.audioCtx = window.getSharedAudioContext ? window.getSharedAudioContext() : new (window.AudioContext || window.webkitAudioContext)();
+
+    // Master Gain
+    this.masterGain = this.audioCtx.createGain();
+    this.masterGain.gain.setValueAtTime(this.volume * 0.4, this.audioCtx.currentTime); // apply current slider volume
+
+    // Create a feedback delay line for a spacious, lush acoustic feel
+    this.delayNode = this.audioCtx.createDelay(1.0);
+    this.delayNode.delayTime.setValueAtTime(0.25, this.audioCtx.currentTime); // 250ms delay
+
+    this.delayGain = this.audioCtx.createGain();
+    this.delayGain.gain.setValueAtTime(0.15, this.audioCtx.currentTime); // subtle feedback
+
+    const delayFeedback = this.audioCtx.createGain();
+    delayFeedback.gain.setValueAtTime(0.25, this.audioCtx.currentTime);
+
+    // Wire Delay Line: Synth -> DelayNode -> delayFeedback -> DelayNode (feedback loop)
+    // and Synth -> DelayNode -> delayGain -> MasterGain
+    this.delayNode.connect(delayFeedback);
+    delayFeedback.connect(this.delayNode);
+    this.delayNode.connect(this.delayGain);
+    this.delayGain.connect(this.masterGain);
+
+    // Connect Master to Speakers
+    this.masterGain.connect(this.audioCtx.destination);
+  }
+
+  // Convert MIDI note number to frequency (Hz)
+  midiToFreq(note) {
+    return 440 * Math.pow(2, (note - 69) / 12);
+  }
+
   playNote(midiNote) {
     this.init();
 
+    // Resume AudioContext if suspended (browser security)
     if (this.audioCtx.state === 'suspended') {
       this.audioCtx.resume();
     }
 
+    // Stop note if it's already playing to prevent duplicates
     if (this.activeNotes.has(midiNote)) {
       this.stopNote(midiNote);
     }
 
-    const ctx = this.audioCtx;
-    const now = ctx.currentTime;
+    const now = this.audioCtx.currentTime;
     const freq = this.midiToFreq(midiNote);
 
-    // Steinway Grand Piano Harmonic Series (Fundamental + Overtones with natural string stiffness)
-    const harmonics = [
-      { ratio: 1.000, type: 'sine',     gain: 0.70 },
-      { ratio: 2.001, type: 'sine',     gain: 0.35 },
-      { ratio: 3.002, type: 'triangle', gain: 0.18 },
-      { ratio: 4.004, type: 'sine',     gain: 0.09 },
-      { ratio: 5.006, type: 'triangle', gain: 0.04 }
-    ];
+    // --- Dynamic Sound Synthesis Setup ---
+    // 1. Osc 1 (Fundamental - Sine) for depth
+    const osc1 = this.audioCtx.createOscillator();
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(freq, now);
 
-    const oscNodes = [];
-    const filter = ctx.createBiquadFilter();
+    // 2. Osc 2 (2nd Harmonic - Triangle) for warmth and body
+    const osc2 = this.audioCtx.createOscillator();
+    osc2.type = 'triangle';
+    osc2.frequency.setValueAtTime(freq * 2, now);
+
+    // 3. Osc 3 (3rd Harmonic - Sine) for sparkling clarity
+    const osc3 = this.audioCtx.createOscillator();
+    osc3.type = 'sine';
+    osc3.frequency.setValueAtTime(freq * 3, now);
+
+    // Gain nodes for harmonics
+    const osc1Gain = this.audioCtx.createGain();
+    const osc2Gain = this.audioCtx.createGain();
+    const osc3Gain = this.audioCtx.createGain();
+
+    osc1Gain.gain.setValueAtTime(0.6, now);
+    osc2Gain.gain.setValueAtTime(0.3, now);
+    osc3Gain.gain.setValueAtTime(0.1, now);
+
+    // Filter to sweep harmonics down (piano-like string envelope)
+    const filter = this.audioCtx.createBiquadFilter();
     filter.type = 'lowpass';
-    // Dynamic brilliance: Higher notes have brighter initial cutoff, lower notes have richer body
-    const initialCutoff = Math.min(12000, Math.max(1200, freq * 7.5));
-    const sustainCutoff = Math.max(600, freq * 1.8);
-    filter.frequency.setValueAtTime(initialCutoff, now);
-    filter.frequency.exponentialRampToValueAtTime(sustainCutoff, now + 1.2);
-    filter.Q.setValueAtTime(1.2, now);
+    filter.frequency.setValueAtTime(freq * 4, now); // start bright
+    filter.frequency.exponentialRampToValueAtTime(freq * 1.5, now + 1.2); // decay to a mellow tone
+    filter.Q.setValueAtTime(1.0, now);
 
-    const noteGain = ctx.createGain();
-    // Acoustic Piano Percussive Envelope (Instant hammer attack, natural sustain, damper decay)
+    // Note Amplitude Envelope (ADSR)
+    const noteGain = this.audioCtx.createGain();
     noteGain.gain.setValueAtTime(0, now);
-    noteGain.gain.linearRampToValueAtTime(0.85, now + 0.004);
-    noteGain.gain.exponentialRampToValueAtTime(0.40, now + 0.25);
+    noteGain.gain.linearRampToValueAtTime(0.8, now + 0.006); // ultra-fast attack
+    noteGain.gain.exponentialRampToValueAtTime(0.35, now + 0.4); // decay
+    // sustain is held at 0.35 until stopNote is called
 
-    harmonics.forEach(h => {
-      const osc = ctx.createOscillator();
-      osc.type = h.type;
-      osc.frequency.setValueAtTime(freq * h.ratio, now);
+    // Connections
+    osc1.connect(osc1Gain);
+    osc2.connect(osc2Gain);
+    osc3.connect(osc3Gain);
 
-      const hGain = ctx.createGain();
-      hGain.gain.setValueAtTime(h.gain, now);
-
-      osc.connect(hGain);
-      hGain.connect(filter);
-      osc.start(now);
-      oscNodes.push(osc);
-    });
-
-    // Felt Hammer Strike Noise Transient
-    try {
-      const sampleRate = ctx.sampleRate;
-      const noiseBuffer = ctx.createBuffer(1, Math.ceil(sampleRate * 0.015), sampleRate);
-      const output = noiseBuffer.getChannelData(0);
-      for (let i = 0; i < output.length; i++) {
-        output[i] = (Math.random() * 2 - 1) * Math.exp(-i / (sampleRate * 0.003));
-      }
-      const hammerNoise = ctx.createBufferSource();
-      hammerNoise.buffer = noiseBuffer;
-
-      const hammerFilter = ctx.createBiquadFilter();
-      hammerFilter.type = 'bandpass';
-      hammerFilter.frequency.setValueAtTime(Math.min(4500, freq * 3.5), now);
-      hammerFilter.Q.setValueAtTime(2.0, now);
-
-      const hammerGain = ctx.createGain();
-      hammerGain.gain.setValueAtTime(0.25, now);
-
-      hammerNoise.connect(hammerFilter);
-      hammerFilter.connect(hammerGain);
-      hammerGain.connect(noteGain);
-      hammerNoise.start(now);
-    } catch (e) {
-      // Fallback if audio buffer creation fails
-    }
+    osc1Gain.connect(filter);
+    osc2Gain.connect(filter);
+    osc3Gain.connect(filter);
 
     filter.connect(noteGain);
     noteGain.connect(this.masterGain);
+    
+    // Also feed a bit of the signal into the spatial delay node
     noteGain.connect(this.delayNode);
 
+    // Start oscillators
+    osc1.start(now);
+    osc2.start(now);
+    osc3.start(now);
+
+    // Store references to shut down later
     this.activeNotes.set(midiNote, {
-      oscillators: oscNodes,
+      oscillators: [osc1, osc2, osc3],
       gain: noteGain,
       filter: filter,
       startTime: now
@@ -236,11 +337,14 @@ export class MusicSynth {
     this.activeNotes.delete(midiNote);
 
     const gainNode = noteObj.gain;
-
+    
+    // Smooth release envelope to prevent digital clicks
     gainNode.gain.cancelScheduledValues(now);
+    // Read the current gain value to release from it
     gainNode.gain.setValueAtTime(gainNode.gain.value || 0.35, now);
-    gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.5);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.5); // 500ms release
 
+    // Stop and disconnect oscillators after release completes
     setTimeout(() => {
       noteObj.oscillators.forEach(osc => {
         try {
@@ -250,89 +354,21 @@ export class MusicSynth {
       });
       try {
         gainNode.disconnect();
-        if (noteObj.filter) noteObj.filter.disconnect();
+        noteObj.filter.disconnect();
       } catch(e) {}
     }, 600);
   }
 
+  // Immediately release every sounding note (safety for interrupted playback)
   stopAllNotes() {
     Array.from(this.activeNotes.keys()).forEach(n => this.stopNote(n));
   }
 
-  startPitchPipeTone(midiNote, profile = this.soundProfile) {
-    this.stopAllNotes();
-    this.init();
-    if (this.audioCtx.state === 'suspended') {
-      this.audioCtx.resume();
-    }
-
-    const now = this.audioCtx.currentTime;
-    const freq = this.midiToFreq(midiNote);
-
-    const osc1 = this.audioCtx.createOscillator();
-    const osc2 = this.audioCtx.createOscillator();
-    const noteGain = this.audioCtx.createGain();
-
-    if (profile === 'organ') {
-      osc1.type = 'sawtooth';
-      osc2.type = 'square';
-      osc1.frequency.setValueAtTime(freq, now);
-      osc2.frequency.setValueAtTime(freq * 2, now);
-    } else if (profile === 'sine') {
-      osc1.type = 'sine';
-      osc2.type = 'sine';
-      osc1.frequency.setValueAtTime(freq, now);
-      osc2.frequency.setValueAtTime(freq, now);
-    } else if (profile === 'flute') {
-      osc1.type = 'triangle';
-      osc2.type = 'sine';
-      osc1.frequency.setValueAtTime(freq, now);
-      osc2.frequency.setValueAtTime(freq * 3, now);
-    } else { // 'choir' default
-      osc1.type = 'sine';
-      osc2.type = 'triangle';
-      osc1.frequency.setValueAtTime(freq, now);
-      osc2.frequency.setValueAtTime(freq * 2, now);
-    }
-
-    noteGain.gain.setValueAtTime(0, now);
-    noteGain.gain.linearRampToValueAtTime(0.45, now + 0.08);
-
-    const filter = this.audioCtx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(profile === 'organ' ? 4500 : 2800, now);
-
-    osc1.connect(filter);
-    osc2.connect(filter);
-    filter.connect(noteGain);
-
-    noteGain.connect(this.masterGain);
-    noteGain.connect(this.delayNode);
-
-    osc1.start(now);
-    osc2.start(now);
-
-    this.activeNotes.set(midiNote, { oscillators: [osc1, osc2], gain: noteGain, filter });
-  }
-
-  playChord(rootMidi, chordType = 'major') {
-    this.stopAllNotes();
-    let intervals = [0, 4, 7];
-    if (chordType === 'minor') intervals = [0, 3, 7];
-    if (chordType === 'cadence') intervals = [0, 4, 7, 12];
-    if (chordType === 'dom7') intervals = [0, 4, 7, 10];
-
-    intervals.forEach(inv => {
-      this.playNote(rootMidi + inv);
-    });
-
-    setTimeout(() => {
-      intervals.forEach(inv => {
-        this.stopNote(rootMidi + inv);
-      });
-    }, 1800);
-  }
-
+  // Formant singing voice — the bot actually SINGS each solfege syllable at the
+  // exact note frequency. Articulation comes from animated formant transitions
+  // (consonant locus gliding into the vowel), diphthong tails ("Doh-oo", "Reh-ay"),
+  // breath noise through the vocal tract, spectral tilt to remove synth buzz,
+  // slow pitch drift + blooming vibrato, and a singer's-formant presence ring.
   singSyllable(midiNote, syllable, durMs) {
     this.init();
     if (this.audioCtx.state === 'suspended') {
@@ -346,19 +382,22 @@ export class MusicSynth {
     const f0 = this.midiToFreq(midiNote);
     const syl = (syllable || 'la').toLowerCase();
 
+    // ---- Phoneme plan ----
+    // Vowel formant targets [F1, F2, F3]
     const V = {
-      o: [450, 800, 2830],
-      u: [350, 700, 2700],
-      a: [700, 1150, 2900],
-      e: [500, 1750, 2600],
-      y: [400, 2000, 2800],
-      i: [300, 2250, 3000]
+      o: [450, 800, 2830],   // "oh"  (Do, Sol)
+      u: [350, 700, 2700],   // "oo"  (diphthong tail of o)
+      a: [700, 1150, 2900],  // "ah"  (Fa, La, Ra)
+      e: [500, 1750, 2600],  // "eh"  (Re, Me, Se, Le, Te)
+      y: [400, 2000, 2800],  // "ay" glide tail of Re
+      i: [300, 2250, 3000]   // "ee"  (Mi, Ti, Di, Ri, Fi, Si, Li)
     };
+    // Consonant formant loci (where the transitions start) + articulation style
     const C = {
       d: { loci: [200, 1700, 2600], style: 'plosive' },
       t: { loci: [200, 1800, 2700], style: 'plosive' },
-      r: { loci: [350, 1100, 1650], style: 'glide' },
-      l: { loci: [350, 1000, 3100], style: 'glide' },
+      r: { loci: [350, 1100, 1650], style: 'glide' },  // low F3 is the /r/ signature
+      l: { loci: [350, 1000, 3100], style: 'glide' },  // high F3 is the /l/ signature
       m: { loci: [250, 1000, 2200], style: 'nasal' },
       f: { loci: [400, 1150, 2500], style: 'fricative' },
       s: { loci: [320, 1900, 2800], style: 'fricative' }
@@ -366,10 +405,11 @@ export class MusicSynth {
     const cons = C[syl.charAt(0)] || C.l;
     const vChar = (syl.slice(1).match(/[aeio]/) || ['a'])[0];
     const vowel = V[vChar];
+    // Diphthong / final-consonant tails make syllables read as words, not tones
     let tail = null;
-    if (vChar === 'o') tail = V.u;
-    if (syl === 're' || syl === 'te' || syl === 'se' || syl === 'le' || syl === 'me') tail = V.y;
-    if (syl === 'sol') tail = C.l.loci;
+    if (vChar === 'o') tail = V.u;                       // Do, Sol → "oh-oo"
+    if (syl === 're' || syl === 'te' || syl === 'se' || syl === 'le' || syl === 'me') tail = V.y; // "eh-ay"
+    if (syl === 'sol') tail = C.l.loci;                  // final /l/
 
     const glideIn = cons.style === 'plosive' ? 0.06 : 0.11;
     const voiceStart = cons.style === 'fricative' ? t0 + 0.05 : (cons.style === 'plosive' ? t0 + 0.018 : t0);
@@ -377,12 +417,13 @@ export class MusicSynth {
     const release = Math.min(0.09, dur * 0.25);
     const tailLen = Math.min(0.1, dur * 0.25);
 
+    // ---- Glottal source: mellow but harmonic, never machine-locked ----
     const osc = ctx.createOscillator();
     osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(f0 * 0.965, voiceStart);
+    osc.frequency.setValueAtTime(f0 * 0.965, voiceStart); // singer's scoop into the pitch
     osc.frequency.linearRampToValueAtTime(f0, voiceStart + 0.06);
 
-    const vib = ctx.createOscillator();
+    const vib = ctx.createOscillator(); // vibrato blooms in after the onset
     vib.frequency.setValueAtTime(5.7, t0);
     const vibGain = ctx.createGain();
     vibGain.gain.setValueAtTime(0, t0);
@@ -391,19 +432,21 @@ export class MusicSynth {
     vib.connect(vibGain);
     vibGain.connect(osc.frequency);
 
-    const jit = ctx.createOscillator();
+    const jit = ctx.createOscillator(); // slow sub-Hz drift = human, not robotic
     jit.frequency.setValueAtTime(0.9, t0);
     const jitGain = ctx.createGain();
     jitGain.gain.setValueAtTime(f0 * 0.0022, t0);
     jit.connect(jitGain);
     jitGain.connect(osc.frequency);
 
+    // Spectral tilt: real voices roll off the buzzy top end
     const tilt = ctx.createBiquadFilter();
     tilt.type = 'highshelf';
     tilt.frequency.setValueAtTime(2800, t0);
     tilt.gain.setValueAtTime(-10, t0);
     osc.connect(tilt);
 
+    // Breath: quiet noise through the same vocal tract takes off the synth edge
     const bbuf = ctx.createBuffer(1, Math.ceil(rate * (dur + 0.1)), rate);
     const bdata = bbuf.getChannelData(0);
     for (let i = 0; i < bdata.length; i++) bdata[i] = Math.random() * 2 - 1;
@@ -417,18 +460,19 @@ export class MusicSynth {
     breath.connect(breathHp);
     breathHp.connect(breathGain);
 
+    // ---- Vocal tract: parallel formants with ANIMATED frequencies ----
     const voiceGain = ctx.createGain();
-    const formantGains = [1.0, 1.1, 0.6];
+    const formantGains = [1.0, 1.1, 0.6]; // F2/F3 carry vowel identity — keep them prominent
     const formantQ = [7, 11, 13];
     [0, 1, 2].forEach(i => {
       const bp = ctx.createBiquadFilter();
       bp.type = 'bandpass';
       bp.Q.setValueAtTime(formantQ[i], t0);
-      bp.frequency.setValueAtTime(cons.loci[i], t0);
-      bp.frequency.linearRampToValueAtTime(vowel[i], voiceStart + glideIn);
+      bp.frequency.setValueAtTime(cons.loci[i], t0);                      // consonant locus...
+      bp.frequency.linearRampToValueAtTime(vowel[i], voiceStart + glideIn); // ...glides into the vowel
       if (tail) {
         bp.frequency.setValueAtTime(vowel[i], tEnd - tailLen);
-        bp.frequency.linearRampToValueAtTime(tail[i], tEnd);
+        bp.frequency.linearRampToValueAtTime(tail[i], tEnd);              // diphthong / final consonant
       }
       const fg = ctx.createGain();
       fg.gain.setValueAtTime(formantGains[i], t0);
@@ -438,6 +482,7 @@ export class MusicSynth {
       fg.connect(voiceGain);
     });
 
+    // Singer's formant: the ~2.9 kHz ring of trained choir voices
     const ringBp = ctx.createBiquadFilter();
     ringBp.type = 'bandpass';
     ringBp.frequency.setValueAtTime(2900, t0);
@@ -448,17 +493,20 @@ export class MusicSynth {
     ringBp.connect(ringGain);
     ringGain.connect(voiceGain);
 
+    // Just enough fundamental warmth to anchor the pitch — the vowel leads
     const warm = ctx.createBiquadFilter();
     warm.type = 'lowpass';
     warm.frequency.setValueAtTime(Math.max(f0 * 1.8, 400), t0);
     const warmGain = ctx.createGain();
-    warmGain.gain.setValueAtTime(0.15, t0);
+    warmGain.gain.setValueAtTime(0.15, t0); // low: the vowel must lead, not a plain tone
     tilt.connect(warm);
     warm.connect(warmGain);
     warmGain.connect(voiceGain);
 
+    // ---- Envelope with consonant articulation ----
     voiceGain.gain.setValueAtTime(0, t0);
     if (cons.style === 'nasal') {
+      // brief closed-mouth murmur ("mmm") before the vowel opens
       voiceGain.gain.linearRampToValueAtTime(0.4, t0 + 0.05);
       voiceGain.gain.linearRampToValueAtTime(1, t0 + 0.13);
     } else {
@@ -469,10 +517,11 @@ export class MusicSynth {
     voiceGain.gain.linearRampToValueAtTime(0.0001, tEnd);
 
     const out = ctx.createGain();
-    out.gain.setValueAtTime(0.9, t0);
+    out.gain.setValueAtTime(0.9, t0); // the voice leads the mix
     voiceGain.connect(out);
     out.connect(this.masterGain);
 
+    // ---- Consonant noise: "S"/"F" hiss or "D"/"T" burst ----
     if (cons.style === 'plosive' || cons.style === 'fricative') {
       const nLen = cons.style === 'fricative' ? 0.085 : 0.022;
       const nbuf = ctx.createBuffer(1, Math.ceil(rate * nLen), rate);
@@ -503,6 +552,7 @@ export class MusicSynth {
     breath.stop(tEnd + 0.05);
   }
 
+  // Short dry metronome click (connects straight to master, bypassing the delay line)
   playClick(accent) {
     this.init();
     if (this.audioCtx.state === 'suspended') {
@@ -521,16 +571,14 @@ export class MusicSynth {
     osc.stop(now + 0.08);
   }
 
+  // Master volume control (0.0 to 1.0)
   setVolume(vol) {
     this.volume = Math.max(0.0, Math.min(1.0, vol));
-    if (!this.masterGain) return;
+    if (!this.masterGain) return; // stored value is applied on init
+    // Short smoothing ramp avoids audible zipper clicks while sliding
     this.masterGain.gain.setTargetAtTime(this.volume * 0.4, this.audioCtx.currentTime, 0.02);
   }
 }
 
-export const synth = new MusicSynth();
-export const musicSynth = synth;
-
-window.synth = synth;
-window.musicSynth = musicSynth;
-
+// Export instance
+window.synth = new MusicSynth();

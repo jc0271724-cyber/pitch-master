@@ -1,6 +1,11 @@
-// Maestro Choir Teacher & Vocal Coach Engine for PitchMaster
+/**
+ * Maestro Choir Teacher & Vocal Coach Engine
+ * Provides speech synthesis, warm-up routines, SATB sectional arrangements,
+ * live intonation coaching, and graded report card generation.
+ */
 
-export const SATB_PIECES = [
+// Preset SATB Choir Pieces
+const SATB_PIECES = [
   {
     id: 'ode_to_joy',
     title: 'Ode to Joy (Beethoven)',
@@ -45,81 +50,192 @@ export const SATB_PIECES = [
   }
 ];
 
-export const WARMUP_ROUTINES = [
+// Preset Warm-up Routines
+const WARMUP_ROUTINES = [
   {
     id: 'scale_ladder',
     name: 'Major Scale Ladder (Solfege Focus)',
     description: 'Build pitch precision with stepping Solfege syllables: Do Re Mi Fa Sol La Ti Do',
     notes: [60, 62, 64, 65, 67, 69, 71, 72],
     syllables: ['Do', 'Re', 'Mi', 'Fa', 'Sol', 'La', 'Ti', 'Do'],
-    durations: ['q', 'q', 'q', 'q', 'q', 'q', 'q', 'h']
+    tip: 'Keep your neck relaxed and support each note with deep abdominal breath.'
   },
   {
-    id: 'arpeggio_bound',
-    name: 'Triad Arpeggio (Do-Mi-Sol-Do)',
-    description: 'Master chordal tuning and vocal resonance across octaves',
+    id: 'arpeggio_glide',
+    name: '5-Note Arpeggio (Resonance & Support)',
+    description: 'Jump smoothly across harmonic intervals: Do Mi Sol Do\' Sol Mi Do',
     notes: [60, 64, 67, 72, 67, 64, 60],
     syllables: ['Do', 'Mi', 'Sol', 'Do', 'Sol', 'Mi', 'Do'],
-    durations: ['q', 'q', 'q', 'h', 'q', 'q', 'h']
+    tip: 'Place the sound forward in the mask of your face for maximum vocal resonance.'
   },
   {
-    id: 'vocal_staccato',
-    name: '5-Note Staccato Bounce',
-    description: 'Light diaphragm support and rapid vocal placement',
-    notes: [60, 62, 64, 65, 67, 65, 64, 62, 60],
-    syllables: ['Mee', 'May', 'Mah', 'Moh', 'Moo', 'Moh', 'Mah', 'May', 'Mee'],
-    durations: ['q', 'q', 'q', 'q', 'q', 'q', 'q', 'q', 'h']
+    id: 'vowel_matching',
+    name: 'Vowel Resonance Drill (Ah-Eh-Ee-Oh-Oo)',
+    description: 'Sustain pure choral vowels on a comfortable tone',
+    notes: [60, 60, 60, 60, 60],
+    syllables: ['Ah', 'Eh', 'Ee', 'Oh', 'Oo'],
+    tip: 'Keep your tall jaw position consistent as you morph between vowel shapes.'
+  },
+  {
+    id: 'staccato_bounce',
+    name: 'Staccato Agility Bounce',
+    description: 'Light, crisp onset practice: Do-Do-Do-Do Sol-Sol-Sol-Sol Do',
+    notes: [60, 60, 60, 60, 67, 67, 67, 67, 60],
+    syllables: ['Ha', 'Ha', 'Ha', 'Ha', 'Ho', 'Ho', 'Ho', 'Ho', 'Ha'],
+    tip: 'Use short diaphragm bounces without pushing tension into your throat.'
   }
 ];
 
-export class ChoirTeacher {
+class ChoirTeacher {
   constructor() {
     this.speechEnabled = true;
-    this.synth = window.speechSynthesis;
-    this.lastSpokenText = '';
+    this.synth = window.speechSynthesis || null;
+    this.currentVoice = null;
+    this.isSpeaking = false;
+    this.lastFeedbackTime = 0;
+    this.feedbackCooldown = 3500; // minimum ms between live spoken tips
+    
+    this.initVoices();
   }
 
-  speak(text) {
+  initVoices() {
+    if (!this.synth) return;
+    const loadVoices = () => {
+      const voices = this.synth.getVoices();
+      this.currentVoice = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Samantha') || v.name.includes('Daniel'))) ||
+                         voices.find(v => v.lang.startsWith('en')) ||
+                         voices[0];
+    };
+    loadVoices();
+    if (this.synth.onvoiceschanged !== undefined) {
+      this.synth.onvoiceschanged = loadVoices;
+    }
+  }
+
+  speak(text, priority = false) {
     if (!this.speechEnabled || !this.synth) return;
-    this.synth.cancel(); // Stop current speech
+    
+    if (priority) {
+      this.synth.cancel();
+    } else if (this.synth.speaking) {
+      return;
+    }
+
     const utterance = new SpeechSynthesisUtterance(text);
+    if (this.currentVoice) {
+      utterance.voice = this.currentVoice;
+    }
     utterance.rate = 1.0;
-    utterance.pitch = 1.0;
+    utterance.pitch = 1.05;
+    utterance.volume = 0.9;
+    
+    utterance.onstart = () => { this.isSpeaking = true; };
+    utterance.onend = () => { this.isSpeaking = false; };
+    utterance.onerror = () => { this.isSpeaking = false; };
+
     this.synth.speak(utterance);
-    this.lastSpokenText = text;
   }
 
-  evaluatePerformance(logs) {
-    if (!logs || logs.length === 0) {
+  stopSpeech() {
+    if (this.synth) {
+      this.synth.cancel();
+      this.isSpeaking = false;
+    }
+  }
+
+  speakCountIn(timeSig = '4/4', callback) {
+    const beats = parseInt(timeSig.split('/')[0]) || 4;
+    const words = Array.from({ length: beats }, (_, i) => (i + 1).toString());
+    
+    let count = 0;
+    const interval = setInterval(() => {
+      if (count < words.length) {
+        this.speak(words[count], true);
+        count++;
+      } else {
+        clearInterval(interval);
+        if (callback) callback();
+      }
+    }, 600);
+  }
+
+  provideLiveCoaching(centsOffset, targetNoteName, detectedNoteName) {
+    const now = Date.now();
+    if (now - this.lastFeedbackTime < this.feedbackCooldown) return null;
+
+    let tip = null;
+    if (Math.abs(centsOffset) <= 10) {
+      tip = { text: `Spot-on intonation! Pure ${targetNoteName}!`, type: 'perfect' };
+    } else if (centsOffset > 15 && centsOffset < 45) {
+      tip = { text: `Slightly sharp (+${Math.round(centsOffset)}c). Relax throat tension.`, type: 'sharp' };
+    } else if (centsOffset < -15 && centsOffset > -45) {
+      tip = { text: `Slightly flat (${Math.round(centsOffset)}c). Lift soft palate and support with air!`, type: 'flat' };
+    }
+
+    if (tip) {
+      this.lastFeedbackTime = now;
+      if (Math.abs(centsOffset) > 15) {
+        this.speak(tip.text);
+      }
+    }
+    return tip;
+  }
+
+  evaluatePerformance(performanceLog) {
+    if (!performanceLog || performanceLog.length === 0) {
       return {
-        grade: 'A',
-        title: 'Master Choir Singer',
-        summary: 'Excellent effort! High pitch precision and clean vocal intonation.',
-        accuracy: 95,
-        cents: '±5¢',
-        notesCount: '8 / 8',
-        recommendation: 'Continue practicing advanced SATB multi-part pieces!'
+        accuracy: 0,
+        avgCents: 0,
+        grade: 'N/A',
+        title: 'Needs Practice',
+        summary: 'No notes recorded. Give it another try!',
+        recommendation: 'Start with free-play or warm-ups to calibrate your vocal range.'
       };
     }
 
-    const total = logs.length;
-    const correct = logs.filter(l => l.isCorrect).length;
-    const acc = Math.round((correct / total) * 100);
+    const totalNotes = performanceLog.length;
+    const matchedNotes = performanceLog.filter(p => p.matched).length;
+    const accuracy = Math.round((matchedNotes / totalNotes) * 100);
 
-    let grade = 'S';
-    let title = 'Flawless Choir Soloist';
-    if (acc < 95 && acc >= 85) { grade = 'A'; title = 'Superior Choir Vocalist'; }
-    else if (acc < 85 && acc >= 70) { grade = 'B'; title = 'Skilled Choir Member'; }
-    else if (acc < 70) { grade = 'C'; title = 'Developing Vocal Student'; }
+    const validCents = performanceLog.filter(p => p.cents !== undefined && !isNaN(p.cents)).map(p => Math.abs(p.cents));
+    const avgCents = validCents.length > 0 ? Math.round(validCents.reduce((a, b) => a + b, 0) / validCents.length) : 0;
+
+    let grade = 'C';
+    let title = 'Developing Vocalist';
+    let summary = 'Solid effort! Consistent practice will sharpen your pitch accuracy.';
+    let recommendation = 'Focus on sustaining notes longer and matching reference tones.';
+
+    if (accuracy >= 95 && avgCents <= 12) {
+      grade = 'S';
+      title = 'Master Choir Vocalist';
+      summary = 'Flawless intonation and pitch placement! Outstanding choir performance.';
+      recommendation = 'Challenge yourself with higher level sight-reading or multi-part SATB sectionals.';
+    } else if (accuracy >= 85) {
+      grade = 'A+';
+      title = 'Choir Soloist Level';
+      summary = 'Exceptional pitch precision and beautiful tonal center!';
+      recommendation = 'Work on maintaining breath support on large interval jumps.';
+    } else if (accuracy >= 75) {
+      grade = 'A';
+      title = 'Advanced Section Member';
+      summary = 'Great job! Strong vocal control with high note accuracy.';
+      recommendation = 'Watch out for slight flatting on note endings.';
+    } else if (accuracy >= 60) {
+      grade = 'B';
+      title = 'Choir Apprentice';
+      summary = 'Good effort! You hit many target notes accurately.';
+      recommendation = 'Try the Scale Ladder warm-up routine before sight-reading.';
+    }
 
     return {
+      accuracy,
+      avgCents,
       grade,
       title,
-      summary: `You completed the exercise with ${acc}% pitch accuracy!`,
-      accuracy: acc,
-      cents: '±6¢',
-      notesCount: `${correct} / ${total}`,
-      recommendation: 'Focus on breathing support and holding target pitches steadily.'
+      summary,
+      recommendation,
+      totalNotes,
+      matchedNotes
     };
   }
 }
