@@ -23,7 +23,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700;800&family=Plus+Jakarta+Sans:wght@700&display=swap" rel="stylesheet">
   
   <!-- Stylesheets -->
-  <link rel="stylesheet" crossorigin href="./assets/index-DJZQcBWa.css">
+  <script type="module" crossorigin src="./assets/index-CHH6D9ZK.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-CeUA75hL.css">
 </head>
 <body>
 
@@ -364,7 +365,21 @@
 
       <!-- 49 Key Piano Keyboard Section (C2 to C6) -->
       <section class="keyboard-container glass-card">
-        <div class="piano-status-display">
+        <!-- Interactive Key Signature Solfege Pitch Guide Panel -->
+        <div class="key-solfege-guide-panel">
+          <div class="key-guide-header">
+            <h3 id="lbl-key-guide-title">🎹 Pitch Reference & Solfege Guide</h3>
+            <span id="lbl-key-acc-badge" class="key-acc-badge">0 Sharps / Flats</span>
+          </div>
+          <p id="lbl-key-guide-desc" class="guide-text" style="margin: 4px 0 8px 0;">
+            Click any Solfege button below to hear its reference pitch, highlight its piano key, and see how to play your pitches in this key!
+          </p>
+          <div id="solfege-buttons-bar" class="solfege-buttons-bar">
+            <!-- Dynamically populated 8 solfege pitch buttons: Do, Re, Mi, Fa, Sol, La, Ti, High Do -->
+          </div>
+        </div>
+
+        <div class="piano-status-display" style="margin-top: 10px;">
           <div class="note-display">
             <span id="lbl-piano-note" class="note-value">—</span>
             <span id="lbl-piano-solfege" class="solfege-value">—</span>
@@ -475,10 +490,5 @@
     </div>
   </div>
 
-  <script src="synth.js"></script>
-  <script src="staff.js"></script>
-  <script src="pitch.js"></script>
-  <script src="teacher.js"></script>
-  <script src="app.js"></script>
 </body>
 </html>

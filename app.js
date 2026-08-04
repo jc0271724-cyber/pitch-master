@@ -1650,6 +1650,56 @@ class AppController {
         }
       }
     });
+
+    // Populate Key Signature Solfege Pitch Reference Bar
+    const guideTitle = document.getElementById('lbl-key-guide-title');
+    const accBadge = document.getElementById('lbl-key-acc-badge');
+    const buttonsBar = document.getElementById('solfege-buttons-bar');
+    
+    if (guideTitle && buttonsBar) {
+      const keyData = KEY_DATABASE[this.currentKeyId];
+      guideTitle.textContent = `🎹 Pitch Reference & Solfege Guide for ${keyData.name}`;
+
+      const cfg = this.staff ? this.staff.keyConfig : { count: 0, type: 'sharp' };
+      const accText = cfg.count === 0 ? '0 Sharps / Flats' : `${cfg.count} ${cfg.type === 'sharp' ? 'Sharps (♯)' : 'Flats (♭)'}`;
+      if (accBadge) accBadge.textContent = accText;
+
+      const midis = this.maestroScaleMidis();
+      if (midis && midis.length >= 8) {
+        buttonsBar.innerHTML = '';
+        midis.forEach((midi, i) => {
+          const spelling = window.getNoteSpelling(midi, cfg);
+          const solfege = this.calculateSolfege(midi);
+          const isBlackKey = spelling.displayName.includes('#') || spelling.displayName.includes('b') || spelling.displayName.includes('♯') || spelling.displayName.includes('♭');
+
+          const btn = document.createElement('button');
+          btn.className = `solfege-pitch-btn solfege-${diatonicSyllables[solfege] || 'do'}`;
+          btn.innerHTML = `
+            <span class="btn-syl">${solfege}${i === 7 ? ' (8va)' : ''}</span>
+            <span class="btn-note">${spelling.displayName}${spelling.octave}</span>
+            ${isBlackKey ? '<span class="black-key-tag">Black Key</span>' : ''}
+          `;
+
+          btn.addEventListener('click', () => {
+            // Trigger piano note sound & highlight key
+            this.triggerPianoNoteStart(midi);
+            window.synth.singSyllable(midi, solfege, 600);
+            this.staff.setPianoNote(midi, solfege);
+
+            // Active button pulse animation
+            document.querySelectorAll('.solfege-pitch-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            setTimeout(() => {
+              this.triggerPianoNoteStop(midi);
+              btn.classList.remove('active');
+            }, 650);
+          });
+
+          buttonsBar.appendChild(btn);
+        });
+      }
+    }
   }
 
   // Demonstrate diatonic scale fingerings on piano keyboard key-by-key
