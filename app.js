@@ -1433,42 +1433,56 @@ class AppController {
       doRoot = keyData.rootMinor;
     }
 
-    const interval = (midi % 12 - doRoot + 12) % 12;
+    // Determine whether chromatic notes are raised vs lowered based on pitch spelling
+    let isRaised = false;
+    if (this.staff && window.getNoteSpelling) {
+      const spelling = window.getNoteSpelling(midi, this.staff.keyConfig);
+      if (spelling.accidental === '#' || spelling.accidental === 'x') {
+        isRaised = true;
+      } else if (spelling.accidental === 'b' || spelling.accidental === 'bb') {
+        isRaised = false;
+      } else if (spelling.accidental === '♮') {
+        const scale = window.getScaleNotes(this.staff.keyConfig);
+        const scaleNote = scale[spelling.letter];
+        if (scaleNote && scaleNote.acc === 'b') isRaised = true;       // Natural raised a flat note
+        else if (scaleNote && scaleNote.acc === '#') isRaised = false; // Natural lowered a sharp note
+      } else {
+        isRaised = keyData.type === 'sharp' || keyData.count === 0;
+      }
+    } else {
+      isRaised = keyData.type === 'sharp' || keyData.count === 0;
+    }
 
     if (this.scaleMode === 'major') {
       // Standard major mode — 7 diatonic + chromatic alternates
       const syllables = {
         0: 'Do',
-        1: isFlatKey ? 'Ra' : 'Di',
+        1: isRaised ? 'Di' : 'Ra',
         2: 'Re',
-        3: isFlatKey ? 'Me' : 'Ri',
+        3: isRaised ? 'Ri' : 'Me',
         4: 'Mi',
         5: 'Fa',
-        6: isFlatKey ? 'Se' : 'Fi',
+        6: isRaised ? 'Fi' : 'Se',
         7: 'Sol',
-        8: isFlatKey ? 'Le' : 'Si',
+        8: isRaised ? 'Si' : 'Le',
         9: 'La',
-        10: isFlatKey ? 'Te' : 'Li',
+        10: isRaised ? 'Li' : 'Te',
         11: 'Ti'
       };
       return syllables[interval];
     } else if (this.scaleMode === 'minor-la') {
-      // La-based minor: same syllables as major but read from Do.
-      // The diatonic scale degrees of the relative major become:
-      //   Do Re Mi Fa Sol La Ti  (C D E F G A B in C major / A minor)
-      // When singing in A minor the tonic note 'A' = 'La', not 'Do'.
       const syllables = {
         0: 'Do',   // relative major tonic (e.g., C in A minor)
-        1: isFlatKey ? 'Ra' : 'Di',
+        1: isRaised ? 'Di' : 'Ra',
         2: 'Re',
-        3: isFlatKey ? 'Me' : 'Ri',
+        3: isRaised ? 'Ri' : 'Me',
         4: 'Mi',
         5: 'Fa',
-        6: isFlatKey ? 'Se' : 'Fi',
+        6: isRaised ? 'Fi' : 'Se',
         7: 'Sol',
-        8: isFlatKey ? 'Le' : 'Si',
-        9: 'La',   // minor tonic (e.g., A in A minor) — this is correct!
-        10: isFlatKey ? 'Te' : 'Li',
+        8: isRaised ? 'Si' : 'Le',
+        9: 'La',   // minor tonic (e.g., A in A minor)
+        10: isRaised ? 'Li' : 'Te',
         11: 'Ti'
       };
       return syllables[interval];
@@ -1749,7 +1763,7 @@ class AppController {
       { id: 'E_maj',  major: 'E',  minor: 'C♯m', acc: '4 ♯ (+D♯)', color: '#f97316' },
       { id: 'B_maj',  major: 'B',  minor: 'G♯m', acc: '5 ♯ (+A♯)', color: '#eab308' },
       { id: 'F#_maj', major: 'F♯', minor: 'D♯m', acc: '6 ♯ / 6 ♭', color: '#10b981' },
-      { id: 'Db_maj', major: 'D♭', minor: 'B♭m', acc: '5 ♭ (+D♭ G♭ A♭)', color: '#06b6d4' },
+      { id: 'Db_maj', major: 'D♭', minor: 'B♭m', acc: '5 ♭ (+G♭)', color: '#06b6d4' },
       { id: 'Ab_maj', major: 'A♭', minor: 'Fm',  acc: '4 ♭ (B♭ E♭ A♭ D♭)', color: '#0284c7' },
       { id: 'Eb_maj', major: 'E♭', minor: 'Cm',  acc: '3 ♭ (B♭ E♭ A♭)', color: '#3b82f6' },
       { id: 'Bb_maj', major: 'B♭', minor: 'Gm',  acc: '2 ♭ (B♭ E♭)', color: '#4f46e5' },
