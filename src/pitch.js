@@ -101,7 +101,7 @@ class PitchTracker {
       if (this.onSilent) this.onSilent();
     } else {
       const freq = this.detectPitch(this.buffer, this.audioCtx.sampleRate);
-      if (freq > 0 && freq >= 60 && freq <= 1200) { // Limit to human vocal singing range (C2 to D#6)
+      if (freq > 0 && freq >= 60 && freq <= 1400) { // Extended vocal/instrument range (C2 to E6)
         // Convert Frequency to fractional MIDI note
         // f = 440 * 2^((d - 69) / 12)  =>  d = 12 * log2(f/440) + 69
         const fractionalMidi = 12 * Math.log2(freq / 440) + 69;
@@ -133,7 +133,7 @@ class PitchTracker {
     if (rms < 0.005) return -1;
 
     const maxPeriod = Math.min(Math.floor(numSamples / 2), Math.ceil(sampleRate / 60));  // 60 Hz min pitch (C2)
-    const minPeriod = Math.floor(sampleRate / 1100); // 1100 Hz max pitch (C6)
+    const minPeriod = Math.floor(sampleRate / 1400); // 1400 Hz max pitch (E6)
 
     // Step 1: Difference Function d(tau)
     const yinBuffer = new Float32Array(maxPeriod);

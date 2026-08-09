@@ -140,6 +140,9 @@ class AppController {
     // Populate Warm-up and SATB dropdowns
     this.initDropdowns();
 
+    // Initialize Circle of Fifths interactive wheel
+    this.initCircleOfFifths();
+
     // Bind UI elements
     this.bindEvents();
     
@@ -228,7 +231,8 @@ class AppController {
       academy: 'tab-academy', 
       practice: 'tab-practice',
       organ: 'tab-organ',
-      rhythm: 'tab-rhythm'
+      rhythm: 'tab-rhythm',
+      circle: 'tab-circle'
     };
     Object.entries(TAB_IDS).forEach(([mode, id]) => {
       const btn = document.getElementById(id);
@@ -749,6 +753,7 @@ class AppController {
     const satbPanel = document.getElementById('satb-panel');
     const organPanel = document.getElementById('organ-panel');
     const rhythmPanel = document.getElementById('rhythm-panel');
+    const circlePanel = document.getElementById('circle-panel');
 
     if (practicePanel) practicePanel.classList.toggle('hidden', mode !== 'practice');
     if (melodyPanel) melodyPanel.classList.toggle('hidden', mode !== 'melody' && mode !== 'academy');
@@ -756,6 +761,7 @@ class AppController {
     if (satbPanel) satbPanel.classList.toggle('hidden', mode !== 'satb');
     if (organPanel) organPanel.classList.toggle('hidden', mode !== 'organ');
     if (rhythmPanel) rhythmPanel.classList.toggle('hidden', mode !== 'rhythm');
+    if (circlePanel) circlePanel.classList.toggle('hidden', mode !== 'circle');
 
     // Clear state belonging to the other modes
     if (mode !== 'practice') {
@@ -1727,6 +1733,177 @@ class AppController {
     setTimeout(() => {
       this.botSinging = false;
     }, midis.length * stepMs + 300);
+  }
+
+  // Interactive Circle of Fifths SVG Wheel Builder
+  initCircleOfFifths() {
+    const svg = document.getElementById('circle-of-fifths-svg');
+    if (!svg) return;
+
+    // 12 Key Signature definitions around the Circle (clockwise starting at top C Major)
+    const CIRCLE_KEYS = [
+      { id: 'C_maj',  major: 'C',  minor: 'Am',  acc: '0 ♯/♭',  color: '#6366f1' },
+      { id: 'G_maj',  major: 'G',  minor: 'Em',  acc: '1 ♯ (F♯)', color: '#8b5cf6' },
+      { id: 'D_maj',  major: 'D',  minor: 'Bm',  acc: '2 ♯ (F♯ C♯)', color: '#ec4899' },
+      { id: 'A_maj',  major: 'A',  minor: 'F♯m', acc: '3 ♯ (F♯ C♯ G♯)', color: '#f43f5e' },
+      { id: 'E_maj',  major: 'E',  minor: 'C♯m', acc: '4 ♯ (+D♯)', color: '#f97316' },
+      { id: 'B_maj',  major: 'B',  minor: 'G♯m', acc: '5 ♯ (+A♯)', color: '#eab308' },
+      { id: 'F#_maj', major: 'F♯', minor: 'D♯m', acc: '6 ♯ / 6 ♭', color: '#10b981' },
+      { id: 'Db_maj', major: 'D♭', minor: 'B♭m', acc: '5 ♭ (+D♭ G♭ A♭)', color: '#06b6d4' },
+      { id: 'Ab_maj', major: 'A♭', minor: 'Fm',  acc: '4 ♭ (B♭ E♭ A♭ D♭)', color: '#0284c7' },
+      { id: 'Eb_maj', major: 'E♭', minor: 'Cm',  acc: '3 ♭ (B♭ E♭ A♭)', color: '#3b82f6' },
+      { id: 'Bb_maj', major: 'B♭', minor: 'Gm',  acc: '2 ♭ (B♭ E♭)', color: '#4f46e5' },
+      { id: 'F_maj',  major: 'F',  minor: 'Dm',  acc: '1 ♭ (B♭)', color: '#4338ca' }
+    ];
+
+    svg.innerHTML = '';
+    const cx = 200, cy = 200, rOuter = 180, rMid = 118, rInner = 60;
+    const sliceAngle = (2 * Math.PI) / 12;
+
+    const describeArc = (x, y, r1, r2, startAngle, endAngle) => {
+      const x1 = x + r1 * Math.sin(startAngle);
+      const y1 = y - r1 * Math.cos(startAngle);
+      const x2 = x + r2 * Math.sin(startAngle);
+      const y2 = y - r2 * Math.cos(startAngle);
+      const x3 = x + r2 * Math.sin(endAngle);
+      const y3 = y - r2 * Math.cos(endAngle);
+      const x4 = x + r1 * Math.sin(endAngle);
+      const y4 = y - r1 * Math.cos(endAngle);
+
+      return `M ${x1} ${y1} L ${x2} ${y2} A ${r2} ${r2} 0 0 1 ${x3} ${y3} L ${x4} ${y4} A ${r1} ${r1} 0 0 0 ${x1} ${y1} Z`;
+    };
+
+    CIRCLE_KEYS.forEach((keyInfo, i) => {
+      const startAngle = i * sliceAngle - sliceAngle / 2;
+      const endAngle = startAngle + sliceAngle;
+      const midAngle = startAngle + sliceAngle / 2;
+
+      // Outer Arc (Major Key)
+      const pathOuter = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      pathOuter.setAttribute('d', describeArc(cx, cy, rMid, rOuter, startAngle, endAngle));
+      pathOuter.setAttribute('fill', keyInfo.color);
+      pathOuter.setAttribute('fill-opacity', '0.25');
+      pathOuter.setAttribute('stroke', 'rgba(255,255,255,0.15)');
+      pathOuter.setAttribute('stroke-width', '1.5');
+      pathOuter.setAttribute('class', `circle-slice circle-slice-${keyInfo.id}`);
+
+      pathOuter.addEventListener('click', () => {
+        this.selectCircleKey(keyInfo);
+      });
+
+      svg.appendChild(pathOuter);
+
+      // Inner Arc (Relative Minor Key)
+      const pathInner = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      pathInner.setAttribute('d', describeArc(cx, cy, rInner, rMid, startAngle, endAngle));
+      pathInner.setAttribute('fill', keyInfo.color);
+      pathInner.setAttribute('fill-opacity', '0.12');
+      pathInner.setAttribute('stroke', 'rgba(255,255,255,0.1)');
+      pathInner.setAttribute('stroke-width', '1');
+      pathInner.setAttribute('class', `circle-slice circle-slice-inner-${keyInfo.id}`);
+
+      pathInner.addEventListener('click', () => {
+        this.selectCircleKey(keyInfo);
+      });
+
+      svg.appendChild(pathInner);
+
+      // Outer Label (Major)
+      const labelDistOuter = (rMid + rOuter) / 2;
+      const lxOuter = cx + labelDistOuter * Math.sin(midAngle);
+      const lyOuter = cy - labelDistOuter * Math.cos(midAngle);
+
+      const textOuter = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      textOuter.setAttribute('x', lxOuter);
+      textOuter.setAttribute('y', lyOuter);
+      textOuter.setAttribute('dominant-baseline', 'central');
+      textOuter.setAttribute('text-anchor', 'middle');
+      textOuter.setAttribute('fill', '#ffffff');
+      textOuter.setAttribute('font-family', '"Outfit", sans-serif');
+      textOuter.setAttribute('font-size', '16');
+      textOuter.setAttribute('font-weight', '800');
+      textOuter.setAttribute('pointer-events', 'none');
+      textOuter.textContent = keyInfo.major;
+      svg.appendChild(textOuter);
+
+      // Inner Label (Minor)
+      const labelDistInner = (rInner + rMid) / 2;
+      const lxInner = cx + labelDistInner * Math.sin(midAngle);
+      const lyInner = cy - labelDistInner * Math.cos(midAngle);
+
+      const textInner = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      textInner.setAttribute('x', lxInner);
+      textInner.setAttribute('y', lyInner);
+      textInner.setAttribute('dominant-baseline', 'central');
+      textInner.setAttribute('text-anchor', 'middle');
+      textInner.setAttribute('fill', 'rgba(255,255,255,0.7)');
+      textInner.setAttribute('font-family', '"Inter", sans-serif');
+      textInner.setAttribute('font-size', '11');
+      textInner.setAttribute('font-weight', '600');
+      textInner.setAttribute('pointer-events', 'none');
+      textInner.textContent = keyInfo.minor;
+      svg.appendChild(textInner);
+    });
+
+    // Center Hub Circle
+    const centerCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    centerCircle.setAttribute('cx', cx);
+    centerCircle.setAttribute('cy', cy);
+    centerCircle.setAttribute('r', rInner - 2);
+    centerCircle.setAttribute('fill', '#09090b');
+    centerCircle.setAttribute('stroke', 'rgba(255,255,255,0.2)');
+    centerCircle.setAttribute('stroke-width', '1.5');
+    svg.appendChild(centerCircle);
+
+    const centerText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    centerText.setAttribute('x', cx);
+    centerText.setAttribute('y', cy - 6);
+    centerText.setAttribute('text-anchor', 'middle');
+    centerText.setAttribute('fill', '#818cf8');
+    centerText.setAttribute('font-family', '"Plus Jakarta Sans", sans-serif');
+    centerText.setAttribute('font-size', '12');
+    centerText.setAttribute('font-weight', '700');
+    centerText.textContent = 'Circle of';
+    svg.appendChild(centerText);
+
+    const centerSub = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    centerSub.setAttribute('x', cx);
+    centerSub.setAttribute('y', cy + 12);
+    centerSub.setAttribute('text-anchor', 'middle');
+    centerSub.setAttribute('fill', '#a1a1aa');
+    centerSub.setAttribute('font-family', '"Inter", sans-serif');
+    centerSub.setAttribute('font-size', '11');
+    centerSub.setAttribute('font-weight', '600');
+    centerSub.textContent = '5ths';
+    svg.appendChild(centerSub);
+
+    this.selectCircleKey(CIRCLE_KEYS[0]);
+  }
+
+  selectCircleKey(keyInfo) {
+    this.currentKeyId = keyInfo.id;
+    const keySelect = document.getElementById('key-select');
+    if (keySelect) keySelect.value = keyInfo.id;
+
+    document.querySelectorAll('.circle-slice').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll(`.circle-slice-${keyInfo.id}, .circle-slice-inner-${keyInfo.id}`).forEach(el => el.classList.add('active'));
+
+    const activeKeyLbl = document.getElementById('lbl-circle-active-key');
+    if (activeKeyLbl) activeKeyLbl.textContent = `Selected Key: ${keyInfo.major} Major / ${keyInfo.minor}`;
+
+    const summaryEl = document.getElementById('circle-key-summary');
+    if (summaryEl) {
+      summaryEl.innerHTML = `
+        <div style="background: rgba(255,255,255,0.04); padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);">
+          <strong>🎼 Key Signature:</strong> ${keyInfo.major} Major (${keyInfo.acc})<br>
+          <strong>🎹 Relative Minor:</strong> ${keyInfo.minor}<br>
+          <span style="color: #a1a1aa; font-size: 12px;">Watch the piano keyboard below highlight every required key in ${keyInfo.major} Major!</span>
+        </div>
+      `;
+    }
+
+    this.updateKeySignature();
+    this.demonstrateScaleOnPiano();
   }
 }
 

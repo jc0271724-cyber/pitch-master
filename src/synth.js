@@ -125,6 +125,9 @@ class MusicSynth {
 
   playWoodblock() {
     this.init();
+    if (this.audioCtx.state === 'suspended') {
+      this.audioCtx.resume();
+    }
     const now = this.audioCtx.currentTime;
     const osc = this.audioCtx.createOscillator();
     const gain = this.audioCtx.createGain();

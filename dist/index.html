@@ -10,21 +10,21 @@
   <meta name="theme-color" content="#09090b">
   
   <!-- PWA Configuration -->
-  <link rel="manifest" href="./assets/manifest-C_RKzJvB.json">
+  <link rel="manifest" href="./assets/manifest-B7onGbJP.json">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="apple-touch-icon" href="./assets/logo-CgTQjcpz.svg">
-  <link rel="icon" type="image/svg+xml" href="./assets/logo-CgTQjcpz.svg">
+  <link rel="apple-touch-icon" href="./assets/logo-CArfWg6x.svg">
+  <link rel="icon" type="image/svg+xml" href="./assets/logo-CArfWg6x.svg">
   
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700;800&family=Plus+Jakarta+Sans:wght@700&display=swap" rel="stylesheet">
   
-  <!-- Stylesheets -->
-  <script type="module" crossorigin src="./assets/index-CHH6D9ZK.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-CeUA75hL.css">
+  <!-- Stylesheets -->
+  <script type="module" crossorigin src="./assets/index-AxwOP6vM.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-CVVg8Z-j.css">
 </head>
 <body>
 
@@ -154,6 +154,7 @@
         <button id="tab-practice" class="tab-button">🎯 Pitch Match</button>
         <button id="tab-organ" class="tab-button">🎺 Pipe Organ Drone</button>
         <button id="tab-rhythm" class="tab-button">🥁 Rhythm Trainer</button>
+        <button id="tab-circle" class="tab-button">⭕ Circle of 5ths</button>
       </div>
 
       <!-- Main Focal Stage: Sheet Music Staff Board -->
@@ -163,6 +164,39 @@
 
       <!-- Active Mode Action Drawer (Holds mode-specific active panels) -->
       <section class="action-drawer">
+        
+        <!-- NEW: Circle of Fifths Interactive Learning Panel -->
+        <div id="circle-panel" class="glass-card stat-card target-card hidden">
+          <div class="target-card-header">
+            <h3>⭕ Circle of 5ths · Key Signature Explorer</h3>
+            <span class="score-badge" id="lbl-circle-active-key">Selected Key: C Major</span>
+          </div>
+          <p class="guide-text">Click any key signature around the wheel below to see how sharps (♯) and flats (♭) build scales, and watch which piano keys to play!</p>
+          
+          <div class="circle-learning-grid">
+            <!-- Left: Interactive Circle of Fifths Wheel SVG -->
+            <div class="circle-wheel-container">
+              <svg id="circle-of-fifths-svg" viewBox="0 0 400 400" width="340" height="340"></svg>
+            </div>
+
+            <!-- Right: Kids' Mnemonics & Key Details -->
+            <div class="circle-info-box">
+              <div class="mnemonic-banner sharp-mnemonic">
+                <strong>♯ Sharps Rule for Kids (Clockwise +5):</strong>
+                <p>"<strong>F</strong>ather <strong>C</strong>harles <strong>G</strong>oes <strong>D</strong>own <strong>A</strong>nd <strong>E</strong>nds <strong>B</strong>attle"</p>
+                <span class="mnemonic-sub">Order of Sharps: F♯ C♯ G♯ D♯ A♯ E♯ B♯</span>
+              </div>
+              <div class="mnemonic-banner flat-mnemonic" style="margin-top: 10px;">
+                <strong>♭ Flats Rule for Kids (Counter-Clockwise -5):</strong>
+                <p>"<strong>B</strong>attle <strong>E</strong>nds <strong>A</strong>nd <strong>D</strong>own <strong>G</strong>oes <strong>C</strong>harles' <strong>F</strong>ather"</p>
+                <span class="mnemonic-sub">Order of Flats: B♭ E♭ A♭ D♭ G♭ C♭ F♭</span>
+              </div>
+              <div class="circle-key-summary" id="circle-key-summary" style="margin-top: 12px;">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+          </div>
+        </div>
         
         <!-- Vocal Warm-up Card (Hidden initially) -->
         <div id="warmup-panel" class="glass-card stat-card target-card hidden">
@@ -489,6 +523,6 @@
       </div>
     </div>
   </div>
-
+
 </body>
 </html>
