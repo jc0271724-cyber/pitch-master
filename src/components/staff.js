@@ -13,8 +13,8 @@ export class MusicStaff {
     this.playbackIndex = null;
 
     this.LINE_SPACING = 12;
-    this.TREBLE_BASE_Y = 100;
-    this.BASS_BASE_Y = 148;
+    this.TREBLE_BASE_Y = 112;
+    this.BASS_BASE_Y = 136;
     this.MID_C_Y = 124;
 
     this.SHARP_ORDER = ['F', 'C', 'G', 'D', 'A', 'E', 'B'];

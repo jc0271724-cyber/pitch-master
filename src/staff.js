@@ -21,8 +21,8 @@ class MusicStaff {
     
     // Constant coordinates
     this.LINE_SPACING = 12;
-    this.TREBLE_BASE_Y = 100; // Y-coord for bottom line of treble staff (E4)
-    this.BASS_BASE_Y = 148;   // Y-coord for top line of bass staff (A3)
+    this.TREBLE_BASE_Y = 112; // Y-coord for bottom line of treble staff (E4)
+    this.BASS_BASE_Y = 136;   // Y-coord for top line of bass staff (A3)
     this.MID_C_Y = 124;       // Y-coord for Middle C (C4)
     
     // Key signature positions
