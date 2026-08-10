@@ -197,6 +197,19 @@ class AppController {
   }
 
   bindEvents() {
+    // Global Mobile WebAudio Unlocker (Required for iOS Safari & Android Chrome)
+    const unlockAudio = () => {
+      if (window.synth) {
+        window.synth.init();
+        if (window.synth.audioCtx && window.synth.audioCtx.state === 'suspended') {
+          window.synth.audioCtx.resume();
+        }
+      }
+    };
+    ['touchstart', 'touchend', 'click'].forEach(evt => {
+      document.addEventListener(evt, unlockAudio, { passive: true, once: true });
+    });
+
     // Key signature selectors
     document.getElementById('key-select').addEventListener('change', (e) => {
       this.currentKeyId = e.target.value;
@@ -395,7 +408,12 @@ class AppController {
     keyboard.addEventListener('pointerdown', (e) => {
       const keyEl = e.target.closest('.piano-key');
       if (!keyEl) return;
-      e.preventDefault();
+      if (window.synth) {
+        window.synth.init();
+        if (window.synth.audioCtx && window.synth.audioCtx.state === 'suspended') {
+          window.synth.audioCtx.resume();
+        }
+      }
       pointerPlay(e.pointerId, keyEl);
     });
 
@@ -1432,6 +1450,8 @@ class AppController {
       // Do-based minor: Do = the minor tonic itself
       doRoot = keyData.rootMinor;
     }
+
+    const interval = (midi % 12 - doRoot + 12) % 12;
 
     // Determine whether chromatic notes are raised vs lowered based on pitch spelling
     let isRaised = false;
