@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pitchmaster-v12';
+const CACHE_NAME = 'pitchmaster-v15';
 const ASSETS = [
   './',
   './index.html',
@@ -8,17 +8,25 @@ const ASSETS = [
   './synth.js',
   './staff.js',
   './pitch.js',
+  './assets/index-Cy3UmxMv.js',
+  './assets/index-CYxK4FWA.css',
   './manifest.json',
-  './icons/logo.svg'
+  './pitchmaster-standalone-offline.html'
 ];
 
 
-// Install Event
+// Install Event (Graceful caching)
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
+    caches.open(CACHE_NAME).then(async cache => {
       console.log('[Service Worker] Caching App Shell Assets');
-      return cache.addAll(ASSETS);
+      for (const asset of ASSETS) {
+        try {
+          await cache.add(asset);
+        } catch (e) {
+          console.warn('[Service Worker] Could not cache asset:', asset, e);
+        }
+      }
     })
   );
   self.skipWaiting();

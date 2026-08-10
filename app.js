@@ -1,3 +1,8 @@
+import './synth.js';
+import './staff.js';
+import './pitch.js';
+import './teacher.js';
+
 // Key Signature database
 const KEY_DATABASE = {
   'C_maj':  { name: 'C Major / A Minor', type: 'sharp', count: 0, rootMajor: 0, rootMinor: 9 },
@@ -105,7 +110,7 @@ class AppController {
     this.targetSuccessActive = false;
     
     // Choir Teacher & Performance Tracking
-    this.teacher = new window.ChoirTeacher();
+    this.teacher = window.ChoirTeacher ? new window.ChoirTeacher() : null;
     this.performanceLog = [];
     this.activeWarmupIndex = 0;
     this.activeSATBPiece = null;
@@ -130,12 +135,19 @@ class AppController {
   }
 
   init() {
-    // Initialize staff renderer
-    this.staff = new window.MusicStaff('music-staff');
-    this.staff.draw();
+    // Retry if dependencies are still loading asynchronously
+    if (!window.ChoirTeacher || !window.MusicStaff || !window.PitchTracker || !window.synth) {
+      console.warn('[PitchMaster] Waiting for dependencies to finish loading...');
+      setTimeout(() => this.init(), 50);
+      return;
+    }
 
-    // Initialize pitch tracker
-    this.pitchTracker = new window.PitchTracker();
+    if (!this.teacher) this.teacher = new window.ChoirTeacher();
+    if (!this.pitchTracker) this.pitchTracker = new window.PitchTracker();
+    if (!this.staff) {
+      this.staff = new window.MusicStaff('music-staff');
+      this.staff.draw();
+    }
 
     // Populate Warm-up and SATB dropdowns
     this.initDropdowns();
