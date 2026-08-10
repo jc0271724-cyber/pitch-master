@@ -110,7 +110,7 @@ class AppController {
     this.targetSuccessActive = false;
     
     // Choir Teacher & Performance Tracking
-    this.teacher = window.ChoirTeacher ? new window.ChoirTeacher() : null;
+    this.teacher = null;
     this.performanceLog = [];
     this.activeWarmupIndex = 0;
     this.activeSATBPiece = null;
@@ -140,10 +140,10 @@ class AppController {
       this.bindEvents();
 
       // 2. Instantiate dependencies safely
-      if (window.ChoirTeacher && !this.teacher) this.teacher = new window.ChoirTeacher();
-      if (window.PitchTracker && !this.pitchTracker) this.pitchTracker = new window.PitchTracker();
-      if (window.MusicStaff && !this.staff) {
-        this.staff = new window.MusicStaff('music-staff');
+      if (!this.teacher) this.teacher = new ChoirTeacher();
+      if (!this.pitchTracker) this.pitchTracker = new PitchTracker();
+      if (!this.staff) {
+        this.staff = new MusicStaff('music-staff');
         this.staff.draw();
       }
 
@@ -155,7 +155,6 @@ class AppController {
       console.log('[PitchMaster] App initialized successfully.');
     } catch (err) {
       console.error('[PitchMaster] Error during init:', err);
-      try { this.bindEvents(); } catch (e) {}
     }
   }
 

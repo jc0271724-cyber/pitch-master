@@ -18,7 +18,10 @@ if (cssFile) {
 
 if (jsFile) {
   const js = fs.readFileSync(path.join(assetsDir, jsFile), 'utf8');
-  html = html.replace(/<script type="module" crossorigin src="[^"]+"><\/script>/, `<script type="module">${js}</script>`);
+  // Remove script tag from head
+  html = html.replace(/<script type="module" crossorigin src="[^"]+"><\/script>/, '');
+  // Inject script tag right before </body> so DOM elements are parsed before execution
+  html = html.replace('</body>', `<script type="module">${js}</script>\n</body>`);
 }
 
 const outputPath = 'pitchmaster-standalone-offline.html';
