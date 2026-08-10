@@ -135,32 +135,28 @@ class AppController {
   }
 
   init() {
-    // Retry if dependencies are still loading asynchronously
-    if (!window.ChoirTeacher || !window.MusicStaff || !window.PitchTracker || !window.synth) {
-      console.warn('[PitchMaster] Waiting for dependencies to finish loading...');
-      setTimeout(() => this.init(), 50);
-      return;
+    try {
+      // 1. ALWAYS bind UI events FIRST so buttons are responsive immediately
+      this.bindEvents();
+
+      // 2. Instantiate dependencies safely
+      if (window.ChoirTeacher && !this.teacher) this.teacher = new window.ChoirTeacher();
+      if (window.PitchTracker && !this.pitchTracker) this.pitchTracker = new window.PitchTracker();
+      if (window.MusicStaff && !this.staff) {
+        this.staff = new window.MusicStaff('music-staff');
+        this.staff.draw();
+      }
+
+      // 3. Populate UI components
+      this.initDropdowns();
+      this.initCircleOfFifths();
+      this.updateKeySignature();
+      this.updatePianoKeyLabels();
+      console.log('[PitchMaster] App initialized successfully.');
+    } catch (err) {
+      console.error('[PitchMaster] Error during init:', err);
+      try { this.bindEvents(); } catch (e) {}
     }
-
-    if (!this.teacher) this.teacher = new window.ChoirTeacher();
-    if (!this.pitchTracker) this.pitchTracker = new window.PitchTracker();
-    if (!this.staff) {
-      this.staff = new window.MusicStaff('music-staff');
-      this.staff.draw();
-    }
-
-    // Populate Warm-up and SATB dropdowns
-    this.initDropdowns();
-
-    // Initialize Circle of Fifths interactive wheel
-    this.initCircleOfFifths();
-
-    // Bind UI elements
-    this.bindEvents();
-    
-    // Update key selections & piano key badges
-    this.updateKeySignature();
-    this.updatePianoKeyLabels();
   }
 
   initDropdowns() {
@@ -1481,93 +1477,99 @@ class AppController {
 
   // Calculate Movable Do Solfege based on active key signature and mode
   calculateSolfege(midi) {
-    const keyData = KEY_DATABASE[this.currentKeyId];
-    const isFlatKey = keyData.type === 'flat' && keyData.count > 0;
+    try {
+      if (midi === null || midi === undefined) return '—';
+      const keyData = KEY_DATABASE[this.currentKeyId || 'C_maj'] || KEY_DATABASE['C_maj'];
+      const isFlatKey = keyData.type === 'flat' && keyData.count > 0;
 
-    // Determine what pitch class = 'Do'
-    let doRoot;
-    if (this.scaleMode === 'major') {
-      doRoot = keyData.rootMajor;
-    } else if (this.scaleMode === 'minor-la') {
-      // La-based minor: Do = relative major root (e.g., in A minor, Do = C)
-      doRoot = keyData.rootMajor;
-    } else { // minor-do
-      // Do-based minor: Do = the minor tonic itself
-      doRoot = keyData.rootMinor;
-    }
+      // Determine what pitch class = 'Do'
+      let doRoot;
+      if (this.scaleMode === 'major') {
+        doRoot = keyData.rootMajor;
+      } else if (this.scaleMode === 'minor-la') {
+        // La-based minor: Do = relative major root (e.g., in A minor, Do = C)
+        doRoot = keyData.rootMajor;
+      } else { // minor-do
+        // Do-based minor: Do = the minor tonic itself
+        doRoot = keyData.rootMinor;
+      }
 
-    const interval = (midi % 12 - doRoot + 12) % 12;
+      const interval = (midi % 12 - doRoot + 12) % 12;
 
-    // Determine whether chromatic notes are raised vs lowered based on pitch spelling
-    let isRaised = false;
-    if (this.staff && window.getNoteSpelling) {
-      const spelling = window.getNoteSpelling(midi, this.staff.keyConfig);
-      if (spelling.accidental === '#' || spelling.accidental === 'x') {
-        isRaised = true;
-      } else if (spelling.accidental === 'b' || spelling.accidental === 'bb') {
-        isRaised = false;
-      } else if (spelling.accidental === '♮') {
-        const scale = window.getScaleNotes(this.staff.keyConfig);
-        const scaleNote = scale[spelling.letter];
-        if (scaleNote && scaleNote.acc === 'b') isRaised = true;       // Natural raised a flat note
-        else if (scaleNote && scaleNote.acc === '#') isRaised = false; // Natural lowered a sharp note
+      // Determine whether chromatic notes are raised vs lowered based on pitch spelling
+      let isRaised = false;
+      if (this.staff && window.getNoteSpelling) {
+        const spelling = window.getNoteSpelling(midi, this.staff.keyConfig);
+        if (spelling.accidental === '#' || spelling.accidental === 'x') {
+          isRaised = true;
+        } else if (spelling.accidental === 'b' || spelling.accidental === 'bb') {
+          isRaised = false;
+        } else if (spelling.accidental === '♮') {
+          const scale = window.getScaleNotes(this.staff.keyConfig);
+          const scaleNote = scale[spelling.letter];
+          if (scaleNote && scaleNote.acc === 'b') isRaised = true;       // Natural raised a flat note
+          else if (scaleNote && scaleNote.acc === '#') isRaised = false; // Natural lowered a sharp note
+        } else {
+          isRaised = keyData.type === 'sharp' || keyData.count === 0;
+        }
       } else {
         isRaised = keyData.type === 'sharp' || keyData.count === 0;
       }
-    } else {
-      isRaised = keyData.type === 'sharp' || keyData.count === 0;
-    }
 
-    if (this.scaleMode === 'major') {
-      // Standard major mode — 7 diatonic + chromatic alternates
-      const syllables = {
-        0: 'Do',
-        1: isRaised ? 'Di' : 'Ra',
-        2: 'Re',
-        3: isRaised ? 'Ri' : 'Me',
-        4: 'Mi',
-        5: 'Fa',
-        6: isRaised ? 'Fi' : 'Se',
-        7: 'Sol',
-        8: isRaised ? 'Si' : 'Le',
-        9: 'La',
-        10: isRaised ? 'Li' : 'Te',
-        11: 'Ti'
-      };
-      return syllables[interval];
-    } else if (this.scaleMode === 'minor-la') {
-      const syllables = {
-        0: 'Do',   // relative major tonic (e.g., C in A minor)
-        1: isRaised ? 'Di' : 'Ra',
-        2: 'Re',
-        3: isRaised ? 'Ri' : 'Me',
-        4: 'Mi',
-        5: 'Fa',
-        6: isRaised ? 'Fi' : 'Se',
-        7: 'Sol',
-        8: isRaised ? 'Si' : 'Le',
-        9: 'La',   // minor tonic (e.g., A in A minor)
-        10: isRaised ? 'Li' : 'Te',
-        11: 'Ti'
-      };
-      return syllables[interval];
-    } else {
-      // Do-based minor: Do = minor tonic, diatonic scale uses Me, Le, Te
-      const syllables = {
-        0: 'Do',
-        1: 'Ra',   // ♭2
-        2: 'Re',
-        3: 'Me',   // ♭3 (minor 3rd)
-        4: 'Mi',   // natural 3 (chromatic passing tone)
-        5: 'Fa',
-        6: 'Se',   // ♭5 enharmonic / ♯4
-        7: 'Sol',
-        8: 'Le',   // ♭6 (minor 6th)
-        9: 'La',   // natural 6 (chromatic passing tone)
-        10: 'Te',  // ♭7 (minor 7th)
-        11: 'Ti'   // natural 7 (leading tone, chromatic)
-      };
-      return syllables[interval];
+      if (this.scaleMode === 'major') {
+        // Standard major mode — 7 diatonic + chromatic alternates
+        const syllables = {
+          0: 'Do',
+          1: isRaised ? 'Di' : 'Ra',
+          2: 'Re',
+          3: isRaised ? 'Ri' : 'Me',
+          4: 'Mi',
+          5: 'Fa',
+          6: isRaised ? 'Fi' : 'Se',
+          7: 'Sol',
+          8: isRaised ? 'Si' : 'Le',
+          9: 'La',
+          10: isRaised ? 'Li' : 'Te',
+          11: 'Ti'
+        };
+        return syllables[interval] || 'Do';
+      } else if (this.scaleMode === 'minor-la') {
+        const syllables = {
+          0: 'Do',   // relative major tonic (e.g., C in A minor)
+          1: isRaised ? 'Di' : 'Ra',
+          2: 'Re',
+          3: isRaised ? 'Ri' : 'Me',
+          4: 'Mi',
+          5: 'Fa',
+          6: isRaised ? 'Fi' : 'Se',
+          7: 'Sol',
+          8: isRaised ? 'Si' : 'Le',
+          9: 'La',   // minor tonic (e.g., A in A minor)
+          10: isRaised ? 'Li' : 'Te',
+          11: 'Ti'
+        };
+        return syllables[interval] || 'Do';
+      } else {
+        // Do-based minor: Do = minor tonic, diatonic scale uses Me, Le, Te
+        const syllables = {
+          0: 'Do',
+          1: 'Ra',   // ♭2
+          2: 'Re',
+          3: 'Me',   // ♭3 (minor 3rd)
+          4: 'Mi',   // natural 3 (chromatic passing tone)
+          5: 'Fa',
+          6: 'Se',   // ♭5 enharmonic / ♯4
+          7: 'Sol',
+          8: 'Le',   // ♭6 (minor 6th)
+          9: 'La',   // natural 6 (chromatic passing tone)
+          10: 'Te',  // ♭7 (minor 7th)
+          11: 'Ti'   // natural 7 (leading tone, chromatic)
+        };
+        return syllables[interval] || 'Do';
+      }
+    } catch (e) {
+      console.warn('[PitchMaster] calculateSolfege error handled:', e);
+      return 'Do';
     }
   }
 
