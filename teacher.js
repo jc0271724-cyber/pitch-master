@@ -5,7 +5,7 @@
  */
 
 // Preset SATB Choir Pieces
-const SATB_PIECES = [
+export const SATB_PIECES = [
   {
     id: 'ode_to_joy',
     title: 'Ode to Joy (Beethoven)',
@@ -51,7 +51,7 @@ const SATB_PIECES = [
 ];
 
 // Preset Warm-up Routines
-const WARMUP_ROUTINES = [
+export const WARMUP_ROUTINES = [
   {
     id: 'scale_ladder',
     name: 'Major Scale Ladder (Solfege Focus)',
@@ -86,7 +86,7 @@ const WARMUP_ROUTINES = [
   }
 ];
 
-class ChoirTeacher {
+export class ChoirTeacher {
   constructor() {
     this.speechEnabled = true;
     this.synth = window.speechSynthesis || null;

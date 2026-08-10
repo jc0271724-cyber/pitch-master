@@ -1,4 +1,4 @@
-class MusicSynth {
+export class MusicSynth {
   constructor() {
     this.audioCtx = null;
     this.masterGain = null;
@@ -584,4 +584,5 @@ class MusicSynth {
 }
 
 // Export instance
-window.synth = new MusicSynth();
+export const synth = new MusicSynth();
+window.synth = synth;

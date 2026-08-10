@@ -8,7 +8,7 @@ const DUR_INFO = {
   e:  { hollow: false, stem: true, flag: true }
 };
 
-class MusicStaff {
+export class MusicStaff {
   constructor(svgId) {
     this.svg = document.getElementById(svgId);
     this.keyConfig = { type: 'sharp', count: 0 }; // Default C Major
@@ -807,7 +807,7 @@ function spelledOctave(midi, letter) {
   return octave;
 }
 
-function getNoteSpelling(midi, keyConfig) {
+export function getNoteSpelling(midi, keyConfig) {
   const pc = midi % 12;
   const scale = getScaleNotes(keyConfig);
 

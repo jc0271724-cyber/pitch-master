@@ -1,7 +1,7 @@
-import './synth.js';
-import './staff.js';
-import './pitch.js';
-import './teacher.js';
+import { MusicSynth, synth } from './synth.js';
+import { MusicStaff, getNoteSpelling } from './staff.js';
+import { PitchTracker } from './pitch.js';
+import { ChoirTeacher, SATB_PIECES, WARMUP_ROUTINES } from './teacher.js';
 
 // Key Signature database
 const KEY_DATABASE = {
@@ -2002,15 +2002,19 @@ if (document.readyState === 'loading') {
 }
 
 // PWA Service Worker Registration
+// Auto-register and force update Service Worker to bypass stale browser cache
 if ('serviceWorker' in navigator) {
-  const registerSW = () => {
-    navigator.serviceWorker.register('./sw.js')
-      .then(reg => console.log('[PWA] Service Worker registered successfully.'))
-      .catch(err => console.error('[PWA] Service Worker registration failed:', err));
+  const registerAndCheck = () => {
+    navigator.serviceWorker.register('./sw.js').then(reg => {
+      console.log('[PWA] Service Worker registered successfully.');
+      reg.update();
+    }).catch(err => {
+      console.error('[PWA] Service Worker registration failed:', err);
+    });
   };
   if (document.readyState === 'complete') {
-    registerSW();
+    registerAndCheck();
   } else {
-    window.addEventListener('load', registerSW);
+    window.addEventListener('load', registerAndCheck);
   }
 }

@@ -1,4 +1,4 @@
-class PitchTracker {
+export class PitchTracker {
   constructor() {
     this.stream = null;
     this.audioCtx = null;
