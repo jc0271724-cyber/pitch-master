@@ -211,15 +211,21 @@ class AppController {
     });
 
     // Key signature selectors
-    document.getElementById('key-select').addEventListener('change', (e) => {
-      this.currentKeyId = e.target.value;
-      this.updateKeySignature();
-    });
+    const keySelect = document.getElementById('key-select');
+    if (keySelect) {
+      keySelect.addEventListener('change', (e) => {
+        this.currentKeyId = e.target.value;
+        this.updateKeySignature();
+      });
+    }
 
-    document.getElementById('mode-select').addEventListener('change', (e) => {
-      this.scaleMode = e.target.value;
-      this.updateKeySignature();
-    });
+    const modeSelect = document.getElementById('mode-select');
+    if (modeSelect) {
+      modeSelect.addEventListener('change', (e) => {
+        this.scaleMode = e.target.value;
+        this.updateKeySignature();
+      });
+    }
 
     // Speech toggle button
     const speechBtn = document.getElementById('btn-toggle-speech');
@@ -227,7 +233,8 @@ class AppController {
       speechBtn.addEventListener('click', () => {
         this.teacher.speechEnabled = !this.teacher.speechEnabled;
         speechBtn.classList.toggle('active', this.teacher.speechEnabled);
-        document.getElementById('lbl-speech-status').textContent = this.teacher.speechEnabled ? 'ON' : 'OFF';
+        const statusEl = document.getElementById('lbl-speech-status');
+        if (statusEl) statusEl.textContent = this.teacher.speechEnabled ? 'ON' : 'OFF';
         if (this.teacher.speechEnabled) {
           this.teacher.speak("Speech feedback enabled!");
         } else {
@@ -265,16 +272,16 @@ class AppController {
     if (clearOrganBtn) clearOrganBtn.addEventListener('click', () => this.clearOrganPipes());
 
     const chordC = document.getElementById('btn-organ-chord-c');
-    if (chordC) chordC.addEventListener('click', () => this.playOrganChord([60, 64, 67])); // C4, E4, G4
+    if (chordC) chordC.addEventListener('click', () => this.playOrganChord([60, 64, 67]));
 
     const chordG = document.getElementById('btn-organ-chord-g');
-    if (chordG) chordG.addEventListener('click', () => this.playOrganChord([55, 59, 62, 67])); // G3, B3, D4, G4
+    if (chordG) chordG.addEventListener('click', () => this.playOrganChord([55, 59, 62, 67]));
 
     const chordF = document.getElementById('btn-organ-chord-f');
-    if (chordF) chordF.addEventListener('click', () => this.playOrganChord([53, 57, 60, 65])); // F3, A3, C4, F4
+    if (chordF) chordF.addEventListener('click', () => this.playOrganChord([53, 57, 60, 65]));
 
     const chordAm = document.getElementById('btn-organ-chord-am');
-    if (chordAm) chordAm.addEventListener('click', () => this.playOrganChord([57, 60, 64])); // A3, C4, E4
+    if (chordAm) chordAm.addEventListener('click', () => this.playOrganChord([57, 60, 64]));
 
     // Rhythm Trainer controls
     const metroBtn = document.getElementById('btn-rhythm-metronome');
@@ -284,9 +291,10 @@ class AppController {
     if (bpmSlider) {
       bpmSlider.addEventListener('input', (e) => {
         this.rhythmBpm = parseInt(e.target.value);
-        document.getElementById('lbl-rhythm-bpm').textContent = this.rhythmBpm;
+        const bpmLbl = document.getElementById('lbl-rhythm-bpm');
+        if (bpmLbl) bpmLbl.textContent = this.rhythmBpm;
         if (this.rhythmMetronomeTimer) {
-          this.toggleRhythmMetronome(); // restart metronome at new tempo
+          this.toggleRhythmMetronome();
           this.toggleRhythmMetronome();
         }
       });
@@ -327,57 +335,82 @@ class AppController {
     const closeReportBtn = document.getElementById('btn-close-report');
     if (closeReportBtn) closeReportBtn.addEventListener('click', () => this.hideReportCard());
 
-
     // Mic toggle
     const micBtn = document.getElementById('btn-mic');
-    micBtn.addEventListener('click', () => {
-      this.toggleMicrophone();
-    });
+    if (micBtn) {
+      micBtn.addEventListener('click', () => {
+        this.toggleMicrophone();
+      });
+    }
 
-    // Play Target Button — Maestro sings the target in solfege at pitch
+    // Play Target Button
     const playTargetBtn = document.getElementById('btn-play-target');
-    playTargetBtn.addEventListener('click', () => {
-      if (this.targetMidi) {
-        this.botSinging = true; // the mic must not match Maestro's own voice
-        window.synth.singSyllable(this.targetMidi, this.calculateSolfege(this.targetMidi), 800);
-        setTimeout(() => { this.botSinging = false; }, 1000);
-      }
-    });
+    if (playTargetBtn) {
+      playTargetBtn.addEventListener('click', () => {
+        if (this.targetMidi) {
+          this.botSinging = true;
+          window.synth.singSyllable(this.targetMidi, this.calculateSolfege(this.targetMidi), 800);
+          setTimeout(() => { this.botSinging = false; }, 1000);
+        }
+      });
+    }
 
     // Maestro demonstration buttons
-    document.getElementById('btn-sing-scale').addEventListener('click', () => this.singScale());
-    document.getElementById('btn-sing-triad').addEventListener('click', () => this.singTriad());
+    const singScaleBtn = document.getElementById('btn-sing-scale');
+    if (singScaleBtn) singScaleBtn.addEventListener('click', () => this.singScale());
+    const singTriadBtn = document.getElementById('btn-sing-triad');
+    if (singTriadBtn) singTriadBtn.addEventListener('click', () => this.singTriad());
     const demoPianoBtn = document.getElementById('btn-demo-piano-scale');
     if (demoPianoBtn) demoPianoBtn.addEventListener('click', () => this.demonstrateScaleOnPiano());
 
     // Melody mode buttons
-    document.getElementById('btn-play-melody').addEventListener('click', () => this.playMelody());
-    document.getElementById('btn-count-melody').addEventListener('click', () => this.countMelody());
-    document.getElementById('btn-sing-melody').addEventListener('click', () => this.singMelody());
-    document.getElementById('melody-level').addEventListener('change', (e) => {
-      this.melodyLevel = parseInt(e.target.value);
-      if (this.mode === 'melody') this.generateMelody();
-    });
-    document.getElementById('melody-tempo').addEventListener('change', (e) => {
-      this.melodyTempo = parseInt(e.target.value);
-    });
-    document.getElementById('btn-new-melody').addEventListener('click', () => {
-      // Also acts as a stop button: generateMelody cancels any running playback/count/sing
-      if (this.mode === 'melody') this.generateMelody();
-    });
-    document.getElementById('btn-hear-current').addEventListener('click', () => {
-      if (!this.melody || this.melodyIndex >= this.melody.length || this.melodyPlaybackActive) return;
-      const current = this.melody[this.melodyIndex];
-      this.melodyBusy = true; // keep the mic from "hearing" the speaker and auto-advancing
-      window.synth.singSyllable(current.midi, current.solfege, 800);
-      setTimeout(() => { if (!this.melodyPlaybackActive) this.melodyBusy = false; }, 1100);
-    });
+    const playMelodyBtn = document.getElementById('btn-play-melody');
+    if (playMelodyBtn) playMelodyBtn.addEventListener('click', () => this.playMelody());
+    const countMelodyBtn = document.getElementById('btn-count-melody');
+    if (countMelodyBtn) countMelodyBtn.addEventListener('click', () => this.countMelody());
+    const singMelodyBtn = document.getElementById('btn-sing-melody');
+    if (singMelodyBtn) singMelodyBtn.addEventListener('click', () => this.singMelody());
+    
+    const melodyLevelSelect = document.getElementById('melody-level');
+    if (melodyLevelSelect) {
+      melodyLevelSelect.addEventListener('change', (e) => {
+        this.melodyLevel = parseInt(e.target.value);
+        if (this.mode === 'melody') this.generateMelody();
+      });
+    }
+
+    const melodyTempoSelect = document.getElementById('melody-tempo');
+    if (melodyTempoSelect) {
+      melodyTempoSelect.addEventListener('change', (e) => {
+        this.melodyTempo = parseInt(e.target.value);
+      });
+    }
+
+    const newMelodyBtn = document.getElementById('btn-new-melody');
+    if (newMelodyBtn) {
+      newMelodyBtn.addEventListener('click', () => {
+        if (this.mode === 'melody') this.generateMelody();
+      });
+    }
+
+    const hearCurrentBtn = document.getElementById('btn-hear-current');
+    if (hearCurrentBtn) {
+      hearCurrentBtn.addEventListener('click', () => {
+        if (!this.melody || this.melodyIndex >= this.melody.length || this.melodyPlaybackActive) return;
+        const current = this.melody[this.melodyIndex];
+        this.melodyBusy = true;
+        window.synth.singSyllable(current.midi, current.solfege, 800);
+        setTimeout(() => { if (!this.melodyPlaybackActive) this.melodyBusy = false; }, 1100);
+      });
+    }
 
     // Volume Slider
     const volumeSlider = document.getElementById('volume-slider');
-    volumeSlider.addEventListener('input', (e) => {
-      window.synth.setVolume(parseFloat(e.target.value));
-    });
+    if (volumeSlider) {
+      volumeSlider.addEventListener('input', (e) => {
+        window.synth.setVolume(parseFloat(e.target.value));
+      });
+    }
 
     // Bind Piano Keys with Pointer Events: supports click, drag-glissando and multi-touch
     const keyboard = document.querySelector('.piano-keyboard');
@@ -1941,17 +1974,31 @@ class AppController {
   }
 }
 
-// Instantiate controller on window load
-window.addEventListener('DOMContentLoaded', () => {
-  window.app = new AppController();
-  window.app.init();
-});
+// Instantiate controller on window load or immediately if DOM is already ready
+const startPitchMasterApp = () => {
+  if (!window.app) {
+    window.app = new AppController();
+    window.app.init();
+    console.log('[PitchMaster] App initialized successfully.');
+  }
+};
+
+if (document.readyState === 'loading') {
+  window.addEventListener('DOMContentLoaded', startPitchMasterApp);
+} else {
+  startPitchMasterApp();
+}
 
 // PWA Service Worker Registration
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
+  const registerSW = () => {
     navigator.serviceWorker.register('./sw.js')
       .then(reg => console.log('[PWA] Service Worker registered successfully.'))
       .catch(err => console.error('[PWA] Service Worker registration failed:', err));
-  });
+  };
+  if (document.readyState === 'complete') {
+    registerSW();
+  } else {
+    window.addEventListener('load', registerSW);
+  }
 }

@@ -4,7 +4,7 @@ import { PitchWheelComponent } from './components/pitchWheel.js';
 import { SolfegeComponent } from './components/solfege.js';
 import { QRModalComponent } from './components/qrModal.js';
 
-document.addEventListener('DOMContentLoaded', () => {
+const initMainApp = () => {
   // Initialize Core PitchMaster App Controller
   const app = new AppController();
   app.init();
@@ -36,6 +36,12 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
   }
-});
+};
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initMainApp);
+} else {
+  initMainApp();
+}
 
 

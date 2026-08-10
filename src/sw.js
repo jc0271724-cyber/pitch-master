@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pitchmaster-v11';
+const CACHE_NAME = 'pitchmaster-v12';
 const ASSETS = [
   './',
   './index.html',
