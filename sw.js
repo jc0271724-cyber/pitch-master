@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pitchmaster-v15';
+const CACHE_NAME = 'pitchmaster-v16';
 const ASSETS = [
   './',
   './index.html',
@@ -8,7 +8,7 @@ const ASSETS = [
   './synth.js',
   './staff.js',
   './pitch.js',
-  './assets/index-Cy3UmxMv.js',
+  './assets/index-Bbf4H-MO.js',
   './assets/index-CYxK4FWA.css',
   './manifest.json',
   './pitchmaster-standalone-offline.html'
