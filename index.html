@@ -10,7 +10,7 @@
   <meta name="theme-color" content="#09090b">
   
   <!-- PWA Configuration -->
-  <link rel="manifest" href="manifest.json">
+  
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -6031,23 +6031,8 @@ if (document.readyState === 'loading') {
   startPitchMasterApp();
 }
 
-// PWA Service Worker Registration
-// Auto-register and force update Service Worker to bypass stale browser cache
-if ('serviceWorker' in navigator) {
-  const registerAndCheck = () => {
-    navigator.serviceWorker.register('./sw.js').then(reg => {
-      console.log('[PWA] Service Worker registered successfully.');
-      reg.update();
-    }).catch(err => {
-      console.error('[PWA] Service Worker registration failed:', err);
-    });
-  };
-  if (document.readyState === 'complete') {
-    registerAndCheck();
-  } else {
-    window.addEventListener('load', registerAndCheck);
-  }
-}
+// Service worker disabled (no sw.js present)
+
 
 </script>
 </body>
